@@ -17,24 +17,24 @@ Python package for lattice calculations in Large Momentum Effective Theory (LaME
 
 ## Installation
 
-// ... Add installation instructions ...
+```
+bash init.sh
+```
 
 ## Usage
 
-// ... Add basic usage examples ...
+Check out examples in `examples/`.
+
+```
+import lametlat as lml
+```
 
 ## Documentation
 
 // ... Add link to documentation or instructions on how to access it ...
 
-## Contributing
-
-// ... Add guidelines for contributing to the project ...
-
-## License
-
-// ... Add license information ...
-
 ## Contact
 
-// ... Add contact information or link to issues page ...
+```
+hejinchen17@gmail.com
+```
