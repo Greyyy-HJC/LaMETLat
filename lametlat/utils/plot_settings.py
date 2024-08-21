@@ -3,6 +3,7 @@ Settings for visualization.
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Color settings
 grey = "#808080"
@@ -67,6 +68,24 @@ tsep_label = r'${t_{\mathrm{sep}}~/~a}$'
 z_label = r'${z~/~a}$'
 lambda_label = r"$\lambda = z P^z$"
 meff_label = r'${m}_{\mathrm{eff}}~/~\mathrm{GeV}$'
+
+def auto_ylim(y_data, yerr_data, y_range_ratio=4):
+    """
+    Calculate the y-axis limits for a plot.
+
+    Args:
+        y_data (list): List of y-values.
+        yerr_data (list): List of y-error values.
+        y_range_ratio (float): Ratio of the y-range to the data range, default is 4.
+
+    Returns:
+        tuple: y-axis limits (y_min, y_max).
+    """
+    all_y = np.concatenate([y + yerr for y, yerr in zip(y_data, yerr_data)] +
+                           [y - yerr for y, yerr in zip(y_data, yerr_data)])
+    y_min, y_max = np.min(all_y), np.max(all_y)
+    y_range = y_max - y_min
+    return y_min - y_range/y_range_ratio, y_max + y_range/y_range_ratio
 
 def default_plot():
     """
