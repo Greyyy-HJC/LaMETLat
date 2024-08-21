@@ -17,6 +17,7 @@ def set_up_log(log_file):
     """
     if os.path.exists(log_file):
         os.remove(log_file)
+
     logging.basicConfig(
         level=logging.DEBUG,
         filename=log_file,
@@ -28,7 +29,7 @@ def set_up_log(log_file):
     fit_count = 0
     bad_fit_count = 0
 
-def log_count_fit(message):
+def log_count_fit(message=None):
     """
     Increments the fit_count and bad_fit_count variables and logs a message if provided.
 
@@ -41,6 +42,6 @@ def log_count_fit(message):
     global fit_count, bad_fit_count
     fit_count += 1
 
-    if message:
+    if message is not None:
         bad_fit_count += 1
         logging.info(message)
