@@ -67,12 +67,34 @@ def pt2_to_meff(pt2_array, boundary="periodic"):
 
     """
     if boundary == "periodic":
-        # meff_array = np.arccosh( (pt2_array[2:] + pt2_array[:-2]) / (2 * pt2_array[1:-1]) ) #! This is not always correct.
+        meff_array = np.arccosh( (pt2_array[2:] + pt2_array[:-2]) / (2 * pt2_array[1:-1]) ) #! This is not always correct.
+
+    elif boundary == "anti-periodic":
+        meff_array = np.arcsinh((pt2_array[2:] + pt2_array[:-2]) / (2 * pt2_array[1:-1])) #! This is not always correct.
+
+    elif boundary == "none":
+        meff_array = np.log(pt2_array[:-1] / pt2_array[1:])
+
+    return meff_array
+
+
+def pt2_to_meff_solve(pt2_array, boundary="periodic"):
+    """
+    Convert a given array of pt2 values to an array of meff values.
+
+    Parameters:
+    - pt2_array (ndarray): Array of pt2 values.
+    - boundary (str, optional): Boundary condition. Can be "periodic" or "anti-periodic". Defaults to "periodic".
+
+    Returns:
+    - meff_array (ndarray): Array of meff values.
+
+    """
+    if boundary == "periodic":
         Nt = len(pt2_array)
         meff_array = calculate_meff(Nt, pt2_array, boundary="periodic")
 
     elif boundary == "anti-periodic":
-        # meff_array = np.arcsinh((pt2_array[2:] + pt2_array[:-2]) / (2 * pt2_array[1:-1])) #! This is not always correct.
         Nt = len(pt2_array)
         meff_array = calculate_meff(Nt, pt2_array, boundary="anti-periodic")
 
