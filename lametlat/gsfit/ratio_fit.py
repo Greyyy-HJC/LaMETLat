@@ -1,9 +1,9 @@
 import numpy as np
 import lsqfit as lsf
 
-from liblattice.gs_fit.log import log_count_fit
-from liblattice.gs_fit.prior_setting import two_state_fit
-from liblattice.gs_fit.fit_funcs import ra_re_fcn, ra_im_fcn
+from lametlat.utils.log import log_count_fit
+from lametlat.gsfit.prior_setting import two_state_fit
+from lametlat.gsfit.fit_funcs import ra_re_fcn, ra_im_fcn
 
 
 def single_ra_fit(

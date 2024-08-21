@@ -3,7 +3,6 @@ FT and inverse FT, with chosen convention.
 """
 
 import numpy as np
-from numba import jit
 
 '''
 @jit(nopython=True)
