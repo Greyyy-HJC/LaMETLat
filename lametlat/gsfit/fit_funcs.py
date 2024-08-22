@@ -102,3 +102,14 @@ def sum_re_2state_fcn(t, tau_cut, p):
 def sum_im_2state_fcn(t, tau_cut, p):
     val = p["pdf_im"] * (t - 2 * tau_cut + 1) + p["im_b1"] + p["im_b2"] * np.exp( -p['dE1'] * t )
     return val
+
+
+# * This is for the FH fit, FH = sum(t + 1) - sum(t)
+
+def fh_re_fcn(t, p):
+    val = p["pdf_re"] + t * 0
+    return val
+
+def fh_im_fcn(t, p):
+    val = p["pdf_im"] + t * 0
+    return val

@@ -8,11 +8,11 @@ from lametlat.gsfit.fit_funcs import ra_re_fcn, ra_im_fcn
 from lametlat.utils.plot_settings import *
 
 
-def single_ra_fit(
+def ra_two_state_fit(
     ra_re_avg_dic, ra_im_avg_dic, tsep_ls, tau_cut, Lt, id_label, pt2_fit_res=None
 ):
     """
-    Perform a single ratio fit.
+    Perform a ratio fit with two states.
 
     Args:
         ra_re_avg_dic (dict of gvar list): Dictionary containing the real part of the ratio average, keys are tsep.
@@ -32,6 +32,11 @@ def single_ra_fit(
     """
 
     priors = two_state_fit()
+    # Set 2pt fit results as priors
+    if pt2_fit_res is not None:
+        priors.update(
+            {key: pt2_fit_res.p[key] for key in ["E0", "log(dE1)", "re_z0", "re_z1"]}
+        )
 
     px = id_label["px"]
     py = id_label["py"]
@@ -45,12 +50,6 @@ def single_ra_fit(
             "re": ra_re_fcn(ra_t, ra_tau, p, Lt),
             "im": ra_im_fcn(ra_t, ra_tau, p, Lt),
         }
-
-    # Set 2pt fit results as priors
-    if pt2_fit_res is not None:
-        priors.update(
-            {key: pt2_fit_res.p[key] for key in ["E0", "log(dE1)", "re_z0", "re_z1"]}
-        )
 
     # Prepare data for fit
     temp_t, temp_tau, ra_fit_re, ra_fit_im = [], [], [], []

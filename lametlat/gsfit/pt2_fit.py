@@ -6,9 +6,9 @@ from lametlat.gsfit.prior_setting import two_state_fit
 
 
 
-def single_2pt_fit(pt2_avg, tmin, tmax, Lt, label=None):
+def pt2_two_state_fit(pt2_avg, tmin, tmax, Lt, label=None):
     """
-    Perform a single 2-point fit on the given data.
+    Perform a 2-point fit with two states.
 
     Args:
         pt2_avg (gvar list): The averaged 2-point data.

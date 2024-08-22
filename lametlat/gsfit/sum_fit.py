@@ -4,14 +4,14 @@ import numpy as np
 import lsqfit as lsf
 import gvar as gv
 
-from lametlat.gsfit.fit_funcs import sum_re_fcn, sum_im_fcn
+from lametlat.gsfit.fit_funcs import sum_re_fcn, sum_im_fcn, sum_re_2state_fcn, sum_im_2state_fcn
 from lametlat.gsfit.prior_setting import summation_fit
 from lametlat.utils.plot_settings import *
 
 
-def single_sum_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label):
+def sum_one_state_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label):
     """
-    Perform a single sum fit.
+    Perform a sum fit with one state.
 
     Args:
         sum_re_avg (array-like): The real part of the sum to be fitted.
@@ -59,6 +59,64 @@ def single_sum_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label):
         )
 
     return sum_fit_res
+
+
+def sum_two_state_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label, pt2_fit_res=None):
+    """
+    Perform a sum fit with two state.
+
+    Args:
+        sum_re_avg (array-like): The real part of the sum to be fitted.
+        sum_im_avg (array-like): The imaginary part of the sum to be fitted.
+        tsep_ls (array-like): The list of time separations.
+        tau_cut (float): The cutoff value for tau.
+        id_label (dict): A dictionary containing the labels for px, py, pz, b, and z.
+
+    Returns:
+        sum_fit_res (object): The result of the sum fit.
+
+    Raises:
+        None
+
+    """
+    priors = summation_fit()
+    # Set 2pt fit results as priors
+    if pt2_fit_res is not None:
+        priors.update(
+            {key: pt2_fit_res.p[key] for key in ["log(dE1)"]}
+        )
+
+    px = id_label["px"]
+    py = id_label["py"]
+    pz = id_label["pz"]
+    b = id_label["b"]
+    z = id_label["z"]
+
+    # * fit function
+    def fcn(x, p):
+        t = x["re"]
+        re = sum_re_2state_fcn(t, tau_cut, p)
+        im = sum_im_2state_fcn(t, tau_cut, p)
+        val = {"re": re, "im": im}
+        return val
+
+    x_dic = {"re": np.array(tsep_ls), "im": np.array(tsep_ls)}
+    y_dic = {"re": sum_re_avg, "im": sum_im_avg}
+    sum_fit_res = lsf.nonlinear_fit(
+        data=(x_dic, y_dic), prior=priors, fcn=fcn, maxit=10000
+    )
+
+    if sum_fit_res.Q < 0.05:
+        logging.warning(
+            f">>> Bad sum fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {sum_fit_res.Q:.3f}, Chi2/dof = {sum_fit_res.chi2/sum_fit_res.dof:.3f}"
+        )
+    else:
+        logging.info(
+            f">>> Good sum fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {sum_fit_res.Q:.3f}, Chi2/dof = {sum_fit_res.chi2/sum_fit_res.dof:.3f}"
+        )
+
+    return sum_fit_res
+
 
 def plot_sum_fit_on_data(sum_re_avg, sum_im_avg, sum_fit_res, err_tsep_ls, fill_tsep_ls, id_label, tau_cut):
     
