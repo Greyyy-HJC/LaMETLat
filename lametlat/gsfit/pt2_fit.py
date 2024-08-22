@@ -42,7 +42,7 @@ def single_2pt_fit(pt2_avg, tmin, tmax, Lt, label=None):
     )
 
     if fit_res.Q < 0.05:
-        logging.info(f">>> Bad 2pt {label} fit with Q = {fit_res.Q}")
+        logging.warning(f">>> Bad 2pt {label} fit with Q = {fit_res.Q}")
     else:
         logging.info(f">>> Good 2pt {label} fit with Q = {fit_res.Q}")
 

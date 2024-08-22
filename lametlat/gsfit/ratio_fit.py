@@ -6,6 +6,7 @@ import gvar as gv
 from lametlat.gsfit.prior_setting import two_state_fit
 from lametlat.gsfit.fit_funcs import ra_re_fcn, ra_im_fcn
 from lametlat.utils.plot_settings import *
+from lametlat.utils.log import log_info
 
 
 def single_ra_fit(
@@ -70,7 +71,7 @@ def single_ra_fit(
 
     # Check the quality of the fit
     if ra_fit_res.Q < 0.05:
-        logging.info(
+        logging.warning(
             f">>> Bad ratio fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {ra_fit_res.Q}"
         )
     else:

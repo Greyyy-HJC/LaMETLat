@@ -50,7 +50,7 @@ def single_sum_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label):
     )
 
     if sum_fit_res.Q < 0.05:
-        logging.info(
+        logging.warning(
             f">>> Bad sum fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {sum_fit_res.Q}"
         )
     else:

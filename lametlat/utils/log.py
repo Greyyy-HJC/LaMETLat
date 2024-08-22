@@ -18,6 +18,7 @@ def set_up_log(log_file):
     """
     if os.path.exists(log_file):
         os.remove(log_file)
+        
     logging.basicConfig(
         level=logging.DEBUG,
         filename=log_file,
