@@ -95,12 +95,16 @@ def sum_im_fcn(t, tau_cut, p):
     val = p["pdf_im"] * (t - 2 * tau_cut + 1) + p["im_b1"]
     return val
 
-def sum_re_2state_fcn(t, tau_cut, p):
-    val = p["pdf_re"] * (t - 2 * tau_cut + 1) + p["re_b1"] + p["re_b2"] * np.exp( -p['dE1'] * t )
+def sum_re_2state_fcn(t, tau_cut, p, dE1=None):
+    if dE1 is None:
+        dE1 = p['dE1']
+    val = p["pdf_re"] * (t - 2 * tau_cut + 1) + p["re_b1"] + p["re_b2"] * np.exp( -dE1 * t )
     return val
 
-def sum_im_2state_fcn(t, tau_cut, p):
-    val = p["pdf_im"] * (t - 2 * tau_cut + 1) + p["im_b1"] + p["im_b2"] * np.exp( -p['dE1'] * t )
+def sum_im_2state_fcn(t, tau_cut, p, dE1=None):
+    if dE1 is None:
+        dE1 = p['dE1']
+    val = p["pdf_im"] * (t - 2 * tau_cut + 1) + p["im_b1"] + p["im_b2"] * np.exp( -dE1 * t )
     return val
 
 

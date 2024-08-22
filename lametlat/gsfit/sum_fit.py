@@ -82,10 +82,11 @@ def sum_two_state_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label, pt2_fi
     priors = summation_fit()
     # Set 2pt fit results as priors
     if pt2_fit_res is not None:
-        priors.update(
-            {key: pt2_fit_res.p[key] for key in ["log(dE1)"]}
-        )
-
+        priors.update( {key: pt2_fit_res.p[key] for key in ["log(dE1)"]} )
+    #     dE1 = gv.mean(np.exp(pt2_fit_res.p['log(dE1)']))
+    # else:
+    #     dE1 = None
+        
     px = id_label["px"]
     py = id_label["py"]
     pz = id_label["pz"]
@@ -108,11 +109,11 @@ def sum_two_state_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label, pt2_fi
 
     if sum_fit_res.Q < 0.05:
         logging.warning(
-            f">>> Bad sum fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {sum_fit_res.Q:.3f}, Chi2/dof = {sum_fit_res.chi2/sum_fit_res.dof:.3f}"
+            f">>> Bad sum two state fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {sum_fit_res.Q:.3f}, Chi2/dof = {sum_fit_res.chi2/sum_fit_res.dof:.3f}"
         )
     else:
         logging.info(
-            f">>> Good sum fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {sum_fit_res.Q:.3f}, Chi2/dof = {sum_fit_res.chi2/sum_fit_res.dof:.3f}"
+            f">>> Good sum two state fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {sum_fit_res.Q:.3f}, Chi2/dof = {sum_fit_res.chi2/sum_fit_res.dof:.3f}"
         )
 
     return sum_fit_res
