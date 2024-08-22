@@ -1,12 +1,11 @@
+import logging
 import numpy as np
 import lsqfit as lsf
 import gvar as gv
 
-from lametlat.utils.log import log_count_fit
 from lametlat.gsfit.prior_setting import two_state_fit
 from lametlat.gsfit.fit_funcs import ra_re_fcn, ra_im_fcn
 from lametlat.utils.plot_settings import *
-from lametlat.utils.resampling import bs_ls_avg
 
 
 def single_ra_fit(
@@ -71,11 +70,13 @@ def single_ra_fit(
 
     # Check the quality of the fit
     if ra_fit_res.Q < 0.05:
-        log_count_fit(
-            f">>> Bad fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {ra_fit_res.Q}"
+        logging.info(
+            f">>> Bad ratio fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {ra_fit_res.Q}"
         )
     else:
-        log_count_fit()
+        logging.info(
+            f">>> Good ratio fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {ra_fit_res.Q}"
+        )
 
     return ra_fit_res
 

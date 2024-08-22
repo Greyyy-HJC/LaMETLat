@@ -1,12 +1,11 @@
 # %%
+import logging
 import numpy as np
 import lsqfit as lsf
 import gvar as gv
 
-from lametlat.utils.log import log_count_fit
 from lametlat.gsfit.fit_funcs import sum_re_fcn, sum_im_fcn
 from lametlat.gsfit.prior_setting import summation_fit
-from lametlat.utils.resampling import bs_ls_avg
 from lametlat.utils.plot_settings import *
 
 
@@ -51,11 +50,13 @@ def single_sum_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label):
     )
 
     if sum_fit_res.Q < 0.05:
-        log_count_fit(
+        logging.info(
             f">>> Bad sum fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {sum_fit_res.Q}"
         )
     else:
-        log_count_fit()
+        logging.info(
+            f">>> Good sum fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {sum_fit_res.Q}"
+        )
 
     return sum_fit_res
 

@@ -1,8 +1,9 @@
+import logging
 import numpy as np
 import lsqfit as lsf
 from lametlat.gsfit.fit_funcs import pt2_re_fcn
 from lametlat.gsfit.prior_setting import two_state_fit
-from lametlat.utils.log import log_count_fit
+
 
 
 def single_2pt_fit(pt2_avg, tmin, tmax, Lt, label=None):
@@ -41,8 +42,8 @@ def single_2pt_fit(pt2_avg, tmin, tmax, Lt, label=None):
     )
 
     if fit_res.Q < 0.05:
-        log_count_fit(f">>> Bad 2pt {label} fit with Q = {fit_res.Q}")
+        logging.info(f">>> Bad 2pt {label} fit with Q = {fit_res.Q}")
     else:
-        log_count_fit()
+        logging.info(f">>> Good 2pt {label} fit with Q = {fit_res.Q}")
 
     return fit_res
