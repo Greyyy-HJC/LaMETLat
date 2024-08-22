@@ -1,4 +1,4 @@
-import logging
+from lametlat.utils.log import logging
 import numpy as np
 import lsqfit as lsf
 import gvar as gv
