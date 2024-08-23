@@ -63,31 +63,43 @@ class T_Matrix:
         self.update_alpha(1)  # calculate alpha 1
         self.update_beta(1)  # calculate beta 2
         for idx1 in range(1, self.m + 1):
-            self.update_A(1, idx1)
-            self.update_B(1, idx1)
-
+            self.update_A(1, idx1) # calculate A[2, idx1]
+            self.update_B(1, idx1) # calculate B[2, idx1]
+            
         for idx2 in range(2, self.m):
             self.update_alpha(idx2) # calculate alpha idx2
             self.update_beta(idx2) # calculate beta idx2 + 1
-            for idx1 in range(1, self.m - 2 * idx2 + 3):
-                self.update_A(idx2, idx1)
-                self.update_B(idx2, idx1)
+            # for idx1 in range(1, self.m - 2 * idx2 + 3): #TODO: m = 6 cannot give alpha 5
+            for idx1 in range(1, 2 * self.m - 2 * idx2 + 3):
+                self.update_A(idx2, idx1) # calculate A[idx2+1, idx1]
+                self.update_B(idx2, idx1) # calculate B[idx2+1, idx1]
 
-        return self.alpha_ls, self.beta_ls
+        self.update_alpha(self.m) # calculate alpha m
+
+        t_matrix = np.zeros((self.m, self.m))
+        for idx1 in range(self.m):
+            for idx2 in range(self.m):
+                if idx1 == idx2:
+                    t_matrix[idx1, idx2] = self.alpha_ls[idx1 + 1]
+                elif abs(idx1 - idx2) == 1:
+                    t_matrix[idx1, idx2] = self.beta_ls[max(idx1, idx2) + 1]
+                    
+        # * check the alpha 2
+        print(">>> check the alpha 2 from the t-matrix: ", self.alpha_ls[2])
+        print(">>> check the alpha 2 from the pt2: ", check_alpha_2(self.pt2_norm))
+
+        return t_matrix
 
 if __name__ == "__main__":
     pt2 = gv.load("../../../examples/data/pion_2pt_example.dat")
     pt2_bs, _ = bootstrap(pt2, samp_times=100)
-    pt2_samp = pt2_bs[0] # Take the first sample
+    pt2_samp = pt2_bs[10] # Take the first sample
 
     pt2_norm = pt2_samp / pt2_samp[0]  # normalize by the C(t=0)
 
-    t_matrix = T_Matrix(pt2_norm, m=5)
-    alpha_ls, beta_ls = t_matrix.main()
-    print(alpha_ls[2])
-    print(check_alpha_2(pt2_norm))
+    t_matrix_class = T_Matrix(pt2_norm, m=6)
+    t_matrix = t_matrix_class.main()
 
-    print(alpha_ls)
-    print(beta_ls)
+    print(t_matrix)
 
 # %%
