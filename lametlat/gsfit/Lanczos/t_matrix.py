@@ -59,7 +59,7 @@ class T_Matrix:
             abs(self.A_ls[j, 2] - self.alpha_ls[j] ** 2 - self.beta_ls[j] ** 2)
         )  # TODO: abs needs to be checked
 
-    def main(self):
+    def main(self, ifcheck=False):
         self.update_alpha(1)  # calculate alpha 1
         self.update_beta(1)  # calculate beta 2
         for idx1 in range(1, self.m + 1):
@@ -85,8 +85,9 @@ class T_Matrix:
                     t_matrix[idx1, idx2] = self.beta_ls[max(idx1, idx2) + 1]
                     
         # * check the alpha 2
-        print(">>> check the alpha 2 from the t-matrix: ", self.alpha_ls[2])
-        print(">>> check the alpha 2 from the pt2: ", check_alpha_2(self.pt2_norm))
+        if ifcheck:
+            print(">>> check the alpha 2 from the t-matrix: ", self.alpha_ls[2])
+            print(">>> check the alpha 2 from the pt2: ", check_alpha_2(self.pt2_norm))
 
         return t_matrix
 
@@ -101,5 +102,19 @@ if __name__ == "__main__":
     t_matrix = t_matrix_class.main()
 
     print(t_matrix)
+    
+    # Calculate eigenvalues of the t_matrix
+    eigenvalues = np.linalg.eigvals(t_matrix)
+    
+    print("Eigenvalues of the t_matrix:")
+    print(eigenvalues)
+    
+    from lametlat.utils.constants import GEV_FM
+    a = 0.06
+    
+    energy_states = - GEV_FM / a * np.log( eigenvalues )
+    
+    print("Energy states:")
+    print(energy_states)
 
 # %%

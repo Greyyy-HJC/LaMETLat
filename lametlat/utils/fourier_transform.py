@@ -97,7 +97,8 @@ def sum_ft_inv_re_im(k_ls, fk_re_ls, fk_im_ls, delta_k, output_x):
     return val_re, val_im
 '''
 
-#* Without numba is even faster
+# * Without numba is even faster
+
 
 def sum_ft(x_ls, fx_ls, delta_x, output_k):
     """FT: f(x) -> f(k), coordinate to momentum by discrete sum, produce complex numbers
@@ -117,6 +118,7 @@ def sum_ft(x_ls, fx_ls, delta_x, output_k):
     val = delta_x / (2 * np.pi) * np.sum(np.exp(1j * x_ls * output_k) * fx_ls)
 
     return val
+
 
 def sum_ft_re_im(x_ls, fx_re_ls, fx_im_ls, delta_x, output_k):
     """FT: f(x) -> f(k), coordinate to momentum by discrete sum, produce real and imaginary part separately
@@ -144,6 +146,7 @@ def sum_ft_re_im(x_ls, fx_re_ls, fx_im_ls, delta_x, output_k):
 
     return val_re, val_im
 
+
 def sum_ft_inv(k_ls, fk_ls, delta_k, output_x):
     """Inverse FT: f(k) -> f(x), momentum to coordinate by discrete sum, produce complex numbers
 
@@ -161,6 +164,7 @@ def sum_ft_inv(k_ls, fk_ls, delta_k, output_x):
     val = delta_k * np.sum(np.exp(-1j * k_ls * output_x) * fk_ls)
 
     return val
+
 
 def sum_ft_inv_re_im(k_ls, fk_re_ls, fk_im_ls, delta_k, output_x):
     """Inverse FT: f(k) -> f(x), momentum to coordinate by discrete sum, produce real and imaginary part separately
@@ -188,7 +192,6 @@ def sum_ft_inv_re_im(k_ls, fk_re_ls, fk_im_ls, delta_k, output_x):
     return val_re, val_im
 
 
-
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from lametlat.utils.plot_settings import *
@@ -197,7 +200,7 @@ if __name__ == "__main__":
 
     # Example function: Gaussian
     def gaussian(x, mu=0, sigma=1):
-        return np.exp(-((x - mu)**2) / (2 * sigma**2)) / (sigma * np.sqrt(2 * np.pi))
+        return np.exp(-((x - mu) ** 2) / (2 * sigma**2)) / (sigma * np.sqrt(2 * np.pi))
 
     start_time = time.time()
 
@@ -215,24 +218,24 @@ if __name__ == "__main__":
     fx_reconstructed = np.array([sum_ft_inv(k, fk, delta_k, xi).real for xi in x])
 
     # Plotting
-    
+
     # Coordinate Space
     ax1 = default_plot()[1]
-    ax1.plot(x, fx, label='Original', color=color_ls[0])
-    ax1.plot(x, fx_reconstructed, '--', label='Reconstructed', color=color_ls[1])
-    ax1.set_xlabel('x', **fs_p)
-    ax1.set_ylabel('f(x)', **fs_p)
+    ax1.plot(x, fx, label="Original", color=color_ls[0])
+    ax1.plot(x, fx_reconstructed, "--", label="Reconstructed", color=color_ls[1])
+    ax1.set_xlabel("x", **fs_p)
+    ax1.set_ylabel("f(x)", **fs_p)
     ax1.legend()
-    ax1.set_title('Coordinate Space', **fs_p)
+    ax1.set_title("Coordinate Space", **fs_p)
 
     # Momentum Space
     ax2 = default_plot()[1]
-    ax2.plot(k, np.real(fk), label='Real', color=color_ls[2])
-    ax2.plot(k, np.imag(fk), label='Imaginary', color=color_ls[3])
-    ax2.set_xlabel('k', **fs_p)
-    ax2.set_ylabel('F(k)', **fs_p)
+    ax2.plot(k, np.real(fk), label="Real", color=color_ls[2])
+    ax2.plot(k, np.imag(fk), label="Imaginary", color=color_ls[3])
+    ax2.set_xlabel("k", **fs_p)
+    ax2.set_ylabel("F(k)", **fs_p)
     ax2.legend()
-    ax2.set_title('Momentum Space', **fs_p)
+    ax2.set_title("Momentum Space", **fs_p)
 
     plt.tight_layout()
     plt.show()
@@ -240,6 +243,8 @@ if __name__ == "__main__":
     end_time = time.time()
     total_time = end_time - start_time
 
-    print("Maximum difference between original and reconstructed function:",
-          np.max(np.abs(fx - fx_reconstructed)))
+    print(
+        "Maximum difference between original and reconstructed function:",
+        np.max(np.abs(fx - fx_reconstructed)),
+    )
     print(f"Total time used: {total_time:.4f} seconds")

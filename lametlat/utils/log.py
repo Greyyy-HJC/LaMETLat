@@ -22,7 +22,7 @@ def set_up_log(log_file):
         print(f"Creating new log file: {log_file}")
     
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         filename=log_file,
         filemode="a",
         format="%(asctime)s - %(levelname)s - %(message)s",
