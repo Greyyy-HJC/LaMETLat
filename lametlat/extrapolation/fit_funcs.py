@@ -15,7 +15,7 @@ def exp_poly_fcn(lam_ls, p):
     Returns:
         val: function value
     """
-    return ( p["b"] + p["c"] * lam_ls + p["d"] * lam_ls**2 + p["e"] * lam_ls**3 ) * np.exp( -lam_ls * ( p["m"] ) ) / ( lam_ls**3 )
+    return ( p["b"] + p["c"] * lam_ls + p["d"] * lam_ls**2 + p["e"] * lam_ls**3 ) * np.exp( -lam_ls * ( p["m"] ) ) / ( lam_ls**4 )
 
 def exp_sin_fcn(lam_ls, p):
     """

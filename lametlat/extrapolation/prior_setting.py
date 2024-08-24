@@ -9,7 +9,7 @@ def Regge_prior(): # For Regge behavior
     priors['c2'] = gv.gvar(1, 10)
     priors['n1'] = gv.gvar(1, 10)
     priors['n2'] = gv.gvar(1, 10)
-    priors['lam0'] = gv.gvar(100, 100)
+    priors['log(lam0)'] = gv.gvar(1, 10)
 
     return priors
 

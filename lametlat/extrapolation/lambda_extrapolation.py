@@ -268,15 +268,9 @@ if __name__ == "__main__":
     # Perform the extrapolation
     # extrapolated_lam_ls, extrapolated_re_gv, extrapolated_im_gv, fit_result = extrapolate_Regge(lam_ls, re_gv, im_gv, fit_idx_range)
 
-    (
-        extrapolated_lam_ls,
-        extrapolated_re_gv,
-        extrapolated_im_gv,
-        fit_result,
-        fit_result_im,
-    ) = extrapolate_exp(
+    extrapolated_lam_ls, extrapolated_re_gv, extrapolated_im_gv, fit_result, fit_result_im = extrapolate_exp(
         lam_ls, re_gv, im_gv, fit_idx_range
-    )  # note here fit_result is fit_result_re
+    )  # note here fit_result is fit_result_re  
 
     # Print some results
     print("Original lambda range:", lam_ls[0], "to", lam_ls[-1])
