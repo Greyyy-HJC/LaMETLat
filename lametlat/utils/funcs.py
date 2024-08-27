@@ -4,7 +4,7 @@ import gvar as gv
 import lsqfit as lsf
 from scipy import interpolate
 
-from lametlat.utils.resampling import gv_ls_to_samples_corr, bs_ls_avg
+from lametlat.utils.resampling import gv_ls_to_samples_corr, bs_ls_avg, jk_ls_avg
 
 def gv_dic_save_to_h5(gv_dic, N_samp, file_path):
     """convert each key of a gvar dictionary to samples, then save the dict to a h5 file
@@ -37,7 +37,7 @@ def constant_fit(data):
     
     return fit_res.p['const']
 
-def add_error_to_sample(sample_ls):
+def add_error_to_sample(sample_ls, jk_bs="bs"):
     """
     Add error to each sample in the sample list by combining the sample with the correlation matrix.
 
@@ -48,7 +48,13 @@ def add_error_to_sample(sample_ls):
         list: List of samples with errors, where each sample is a gvar object representing the sample with error.
 
     """
-    avg = bs_ls_avg(sample_ls)
+    if jk_bs == "bs":
+        avg = bs_ls_avg(sample_ls)
+    elif jk_bs == "jk":
+        avg = jk_ls_avg(sample_ls)
+    else:
+        raise ValueError(f"Invalid jk_bs: {jk_bs}")
+    
     cov = gv.evalcov(avg)
     return np.array([gv.gvar(sample, cov) for sample in sample_ls])
 

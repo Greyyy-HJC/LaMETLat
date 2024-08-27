@@ -33,12 +33,13 @@ def bin_data(data, bin_size, axis=0):
     return binned_data.swapaxes(0, axis)
 
 
-def bootstrap(data, samp_times, axis=0, bin=1, seed=1984):
+def bootstrap(data, samp_times, samp_size=None, axis=0, bin=1, seed=1984):
     """Do bootstrap resampling on the data, take random samples from the data and average them.
 
     Args:
         data (list): Data to be resampled.
         samp_times (int): How many times to sample, i.e., how many bootstrap samples to generate.
+        samp_size (int, optional): How many samples to take each time. Defaults to None.
         axis (int, optional): Which axis to resample on. Defaults to 0.
         bin (int, optional): Bin size to reduce autocorrelation. Defaults to 1.
         seed (int, optional): Seed for the random number generator. Defaults to 1984.
@@ -55,9 +56,11 @@ def bootstrap(data, samp_times, axis=0, bin=1, seed=1984):
     # Bin the data to reduce autocorrelation
     if bin > 1:
         data = bin_data(data, bin, axis=axis)
-
+        
     N_conf = data.shape[axis]
-    conf_bs = np.random.choice(N_conf, (samp_times, N_conf), replace=True)
+    if samp_size is None:
+        samp_size = N_conf
+    conf_bs = np.random.choice(N_conf, (samp_times, samp_size), replace=True)
     bs_ls = np.take(data, conf_bs, axis=axis)
     bs_ls = np.mean(bs_ls, axis=axis + 1)
 
