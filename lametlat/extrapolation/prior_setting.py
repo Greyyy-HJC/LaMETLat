@@ -20,7 +20,7 @@ def exp_decay_prior():
     priors["d"] = gv.gvar(0, 10)
     priors["e"] = gv.gvar(0, 10)
     priors["log(n)"] = gv.gvar(0, 10)
-    priors["log(m)"] = gv.gvar(-2.4, 10)
+    priors["log(m)"] = gv.gvar(-2.4, 2.4) # gv.gvar(-2.4, 10)
     
     return priors
 

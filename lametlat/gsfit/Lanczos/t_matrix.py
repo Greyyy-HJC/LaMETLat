@@ -73,14 +73,12 @@ class T_Matrix:
 
     def update_beta(self, j):  # * Need: A[j, 2], alpha[j], beta[j]
         self.beta_ls[j + 1] = np.sqrt(self.A_ls[j, 2] - self.alpha_ls[j]**2 - self.beta_ls[j]**2)
-        # self.beta_ls[j + 1] = np.sqrt(
-        #     abs(self.A_ls[j, 2] - self.alpha_ls[j] ** 2 - self.beta_ls[j] ** 2)
-        # )  # TODO: abs needs to be checked
+        # self.beta_ls[j + 1] = np.sqrt(abs(self.A_ls[j, 2] - self.alpha_ls[j] ** 2 - self.beta_ls[j] ** 2))  # TODO: abs needs to be checked
 
     def main(self, ifcheck=False):
         self.update_alpha(1)  # calculate alpha 1
         self.update_beta(1)  # calculate beta 2
-        for idx1 in range(1, self.m + 1):
+        for idx1 in range(1, 2 * self.m):
             self.update_A(1, idx1) # calculate A[2, idx1]
             self.update_B(1, idx1) # calculate B[2, idx1]
             
@@ -97,9 +95,9 @@ class T_Matrix:
         for idx1 in range(self.m):
             for idx2 in range(self.m):
                 if idx1 == idx2:
-                    t_matrix[idx1, idx2] = self.alpha_ls[idx1 + 1].real
+                    t_matrix[idx1, idx2] = self.alpha_ls[idx1 + 1]
                 elif abs(idx1 - idx2) == 1:
-                    t_matrix[idx1, idx2] = self.beta_ls[max(idx1, idx2) + 1].real
+                    t_matrix[idx1, idx2] = self.beta_ls[max(idx1, idx2) + 1]
                     
         # * check the alpha 2
         if ifcheck:
@@ -110,33 +108,61 @@ class T_Matrix:
 
 if __name__ == "__main__":
     from lametlat.utils.constants import GEV_FM
-    a = 0.06
+    a = 0.04
+    pt2_data = np.loadtxt("../../../examples/data/c2pt.CG52bxp00_CG52bxp00.SS.meson_g15.PX0_PY0_PZ0.real_mean.txt", delimiter='\t')
+    print(np.shape(pt2_data))
     
+    pt2_samp = pt2_data[:,1] # take the mean value as a check
+    print(np.shape(pt2_samp))
     
-    pt2 = gv.load("../../../examples/data/pion_2pt_example.dat")
-    pt2_bs, _ = bootstrap(pt2, samp_times=100)
-    pt2_samp = pt2_bs[10] # Take the first sample
-
     pt2_norm = pt2_samp / pt2_samp[0]  # normalize by the C(t=0)
 
-    t_matrix_class = T_Matrix(pt2_norm, m=6)
-    t_matrix = t_matrix_class.main()
-
+    t_matrix_class = T_Matrix(pt2_norm, m=5)
+    t_matrix = t_matrix_class.main(ifcheck=True)
+    print("\n>>> alpha_ls:")
+    print(t_matrix_class.alpha_ls)
+    print("\n>>> beta_ls:")
+    print(t_matrix_class.beta_ls)
+    print("\n>>> T-matrix:")
     print(t_matrix)
-    
+
     # Calculate eigenvalues of the t_matrix
     eigenvalues = cut_spurious(t_matrix, tolerance=0.1)
     # Select eigenvalues with imaginary part smaller than threshold
-    eigenvalues = eigenvalues[np.abs(eigenvalues.imag) < 1e-12].real
+    eigenvalues = eigenvalues[np.abs(eigenvalues.imag) < 1e-8].real
     # Calculate energy states
     energy_states = - GEV_FM / a * np.log( eigenvalues )
     energy_states = np.array([e for e in energy_states if not np.isnan(e) and e > 0])
     energy_states = np.sort(energy_states)
     
-    print("Eigenvalues of the t_matrix:")
+    print("\n>>> Eigenvalues of the t_matrix:")
     print(eigenvalues)
     
-    print("Energy states:")
+    print("\n>>> Energy states:")
     print(energy_states)
 
+# %%
+if __name__ == "__main__":
+    e0_ls = []
+    for m in range(4, 32, 2):
+        t_matrix_class = T_Matrix(pt2_norm, m=m)
+        t_matrix = t_matrix_class.main(ifcheck=False)
+        eigenvalues = cut_spurious(t_matrix, tolerance=0.1)
+        eigenvalues = eigenvalues[np.abs(eigenvalues.imag) < 1e-8].real
+        energy_states = - GEV_FM / a * np.log( eigenvalues )
+        energy_states = np.array([e for e in energy_states if not np.isnan(e) and e > 0])
+        energy_states = np.sort(energy_states)
+        e0_ls.append(energy_states[0])
+    
+    print(e0_ls)
+    
+    import matplotlib.pyplot as plt
+    from lametlat.utils.plot_settings import *
+    fig, ax = default_plot()
+    ax.scatter(range(4, 32, 2), e0_ls)
+    ax.set_xlabel("m", **fs_p)
+    ax.set_ylabel("E0", **fs_p)
+    plt.tight_layout()
+    plt.show()
+    
 # %%
