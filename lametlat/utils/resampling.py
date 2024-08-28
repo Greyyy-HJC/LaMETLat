@@ -105,8 +105,14 @@ def jk_ls_avg(jk_ls):
 
     N_sample = len(jk_ls)
     mean = np.mean(jk_ls, axis=0)
-    cov = np.cov(jk_ls, rowvar=False) * (N_sample - 1)
-    gv_ls = gv.gvar(mean, cov)
+    
+    # * if only one variable, use standard deviation
+    if len(shape) == 1:
+        sdev = np.std(jk_ls, axis=0) * np.sqrt(N_sample - 1)
+        gv_ls = gv.gvar(mean, sdev)
+    else:
+        cov = np.cov(jk_ls, rowvar=False) * (N_sample - 1)
+        gv_ls = gv.gvar(mean, cov)
 
     return np.reshape(gv_ls, shape[1:])
 
