@@ -20,6 +20,7 @@ def set_up_log(log_file):
     
     if not os.path.exists(log_file):
         print(f"Creating new log file: {log_file}")
+        open(log_file, "w").close()
     
     logging.basicConfig(
         level=logging.INFO,
