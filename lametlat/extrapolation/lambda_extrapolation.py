@@ -98,26 +98,30 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
         three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
     """
     lam_gap = abs(lam_ls[1] - lam_ls[0])  # the gap between two discrete lambda
-
-    lam_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
+    
+    lam_re_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
+    lam_im_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
     re_fit = re_gv[fit_idx_range[0] : fit_idx_range[1]]
     im_fit = im_gv[fit_idx_range[0] : fit_idx_range[1]]
 
-    priors = exp_decay_prior()
+    priors_re = exp_decay_prior()
+    priors_re["a"] = gv.gvar(re_fit[0].mean, re_fit[0].mean / 2)
+    priors_im = exp_decay_prior()
+    priors_im["a"] = gv.gvar(im_fit[0].mean, im_fit[0].mean / 2)
 
     fit_result_re = lsf.nonlinear_fit(
-        data=(lam_fit, re_fit),
-        prior=priors,
-        fcn=exp_poly_fcn,
+        data=(lam_re_fit, re_fit),
+        prior=priors_re,
+        fcn=exp_power_fcn,
         maxit=10000,
         svdcut=1e-100,
         fitter="scipy_least_squares",
     )
 
     fit_result_im = lsf.nonlinear_fit(
-        data=(lam_fit, im_fit),
-        prior=priors,
-        fcn=exp_poly_fcn,
+        data=(lam_im_fit, im_fit),
+        prior=priors_im,
+        fcn=exp_power_fcn,
         maxit=10000,
         svdcut=1e-100,
         fitter="scipy_least_squares",
@@ -150,10 +154,32 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
 
     re_gv_part2 = exp_poly_fcn(lam_ls_part2, fit_result_re.p)
     im_gv_part2 = exp_poly_fcn(lam_ls_part2, fit_result_im.p)
-
+    
+    # *: standardize the way to do the extrapolation
     extrapolated_lam_ls = list(lam_ls_part1) + list(lam_ls_part2)
     extrapolated_re_gv = list(re_gv_part1) + list(re_gv_part2)
     extrapolated_im_gv = list(im_gv_part1) + list(im_gv_part2)
+    
+    # *: Smooth the connection point
+    # Define the number of points for gradual weighting
+    num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
+    
+    # Calculate weights for gradual transition
+    weights = np.linspace(0, 1, num_gradual_points)
+    
+    # Prepare lists for the weighted averages
+    weighted_re = []
+    weighted_im = []
+    
+    for i in range(num_gradual_points):
+        w = weights[i]
+        weighted_re.append(w * re_gv_part2[i] + (1 - w) * re_gv[fit_idx_range[0] + i])
+        weighted_im.append(w * im_gv_part2[i] + (1 - w) * im_gv[fit_idx_range[0] + i])
+    
+    # Combine the parts
+    extrapolated_re_gv = list(re_gv_part1) + weighted_re + list(re_gv_part2[num_gradual_points:])
+    extrapolated_im_gv = list(im_gv_part1) + weighted_im + list(im_gv_part2[num_gradual_points:])
+
 
     return (
         extrapolated_lam_ls,
@@ -174,6 +200,41 @@ def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapo
         fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
         save (bool, optional): whether save it. Defaults to True.
     """
+    
+    # Interpolate the extrapolated data
+    from scipy import interpolate
+    import gvar as gv
+    import numpy as np
+
+    # Define a finer lambda grid for interpolation
+    lam_interp = np.linspace(min(extrapolated_lam_ls), max(extrapolated_lam_ls), len(extrapolated_lam_ls) * 10)
+
+    # Interpolate real part
+    re_mean = [v.mean for v in extrapolated_re_gv]
+    re_sdev = [v.sdev for v in extrapolated_re_gv]
+    f_re_mean = interpolate.interp1d(extrapolated_lam_ls, re_mean, kind='cubic')
+    f_re_sdev = interpolate.interp1d(extrapolated_lam_ls, re_sdev, kind='cubic')
+    re_mean_interp = f_re_mean(lam_interp)
+    re_sdev_interp = f_re_sdev(lam_interp)
+
+    # Interpolate imaginary part
+    im_mean = [v.mean for v in extrapolated_im_gv]
+    im_sdev = [v.sdev for v in extrapolated_im_gv]
+    f_im_mean = interpolate.interp1d(extrapolated_lam_ls, im_mean, kind='cubic')
+    f_im_sdev = interpolate.interp1d(extrapolated_lam_ls, im_sdev, kind='cubic')
+    im_mean_interp = f_im_mean(lam_interp)
+    im_sdev_interp = f_im_sdev(lam_interp)
+
+    # Combine interpolated mean and sdev into gvar
+    extrapolated_re_gv_interp = [gv.gvar(m, s) for m, s in zip(re_mean_interp, re_sdev_interp)]
+    extrapolated_im_gv_interp = [gv.gvar(m, s) for m, s in zip(im_mean_interp, im_sdev_interp)]
+
+    # Update variables with interpolated values
+    extrapolated_lam_ls = lam_interp
+    extrapolated_re_gv = extrapolated_re_gv_interp
+    extrapolated_im_gv = extrapolated_im_gv_interp
+    
+    
 
     # * plot the real part
     fig, ax = default_plot()

@@ -17,6 +17,22 @@ def exp_poly_fcn(lam_ls, p):
     """
     return ( p["b"] + p["c"] * lam_ls + p["d"] * lam_ls**2 + p["e"] * lam_ls**3 ) * np.exp( -lam_ls * ( p["m"] ) ) / ( lam_ls**4 )
 
+
+def exp_power_fcn(lam_ls, p):
+    """
+    No Regge behavior.
+
+    Args:
+        lam_ls (list): lambda = z * Pz
+        p (prior): prior dict
+
+    Returns:
+        val: function value
+    """
+    return p["a"] * np.exp( -lam_ls * ( p["m"] ) ) / ( lam_ls**p["n"] )
+
+
+
 def exp_sin_fcn(lam_ls, p):
     """
     No Regge behavior.
