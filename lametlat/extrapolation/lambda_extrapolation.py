@@ -11,6 +11,62 @@ from lametlat.utils.plot_settings import *
 from lametlat.extrapolation.fit_funcs import *
 from lametlat.extrapolation.prior_setting import *
 
+def extrapolate_no_fit(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
+    """
+    Fit and extrapolate the quasi distribution at large lambda using simple exponential decay, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
+
+    Args:
+        lam_ls (list): lambda list
+        re_gv (list): gvar list of real part of quasi distribution
+        im_gv (list): gvar list of imag part of quasi distribution
+        fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+
+    Returns:
+        three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
+    """
+    lam_gap = abs(lam_ls[1] - lam_ls[0])  # the gap between two discrete lambda
+
+    # * two parts: data points and extrapolated points
+    lam_ls_part1 = lam_ls[: fit_idx_range[0]]
+    re_gv_part1 = re_gv[: fit_idx_range[0]]
+    im_gv_part1 = im_gv[: fit_idx_range[0]]
+
+    lam_ls_part2 = np.arange(lam_ls[fit_idx_range[0]], extrapolated_length, lam_gap)
+
+    re_gv_part2 = [gv.gvar(0, 0) for _ in range(len(lam_ls_part2))]
+    im_gv_part2 = [gv.gvar(0, 0) for _ in range(len(lam_ls_part2))]
+    
+    # *: Smooth the connection point
+    extrapolated_lam_ls = list(lam_ls_part1) + list(lam_ls_part2)
+    
+    # Define the number of points for gradual weighting
+    num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
+    
+    # Calculate weights for gradual transition
+    weights = np.linspace(0, 1, num_gradual_points)
+    
+    # Prepare lists for the weighted averages
+    weighted_re = []
+    weighted_im = []
+    
+    for i in range(num_gradual_points):
+        w = weights[i]
+        weighted_re.append(w * re_gv_part2[i] + (1 - w) * re_gv[fit_idx_range[0] + i])
+        weighted_im.append(w * im_gv_part2[i] + (1 - w) * im_gv[fit_idx_range[0] + i])
+    
+    # Combine the parts
+    extrapolated_re_gv = list(re_gv_part1) + weighted_re + list(re_gv_part2[num_gradual_points:])
+    extrapolated_im_gv = list(im_gv_part1) + weighted_im + list(im_gv_part2[num_gradual_points:])
+
+
+    return (
+        extrapolated_lam_ls,
+        extrapolated_re_gv,
+        extrapolated_im_gv,
+        None,
+        None,
+    )
+
 
 def extrapolate_Regge(
     lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
@@ -97,6 +153,8 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
     Returns:
         three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
     """
+    exp_fcn = exp_power_fcn
+    
     lam_gap = abs(lam_ls[1] - lam_ls[0])  # the gap between two discrete lambda
     
     lam_re_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
@@ -105,14 +163,14 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
     im_fit = im_gv[fit_idx_range[0] : fit_idx_range[1]]
 
     priors_re = exp_decay_prior()
-    priors_re["a"] = gv.gvar(re_fit[0].mean, re_fit[0].mean / 2)
+    # priors_re["a"] = gv.gvar(re_fit[0].mean, re_fit[0].mean)
     priors_im = exp_decay_prior()
-    priors_im["a"] = gv.gvar(im_fit[0].mean, im_fit[0].mean / 2)
+    # priors_im["a"] = gv.gvar(im_fit[0].mean, im_fit[0].mean)
 
     fit_result_re = lsf.nonlinear_fit(
         data=(lam_re_fit, re_fit),
         prior=priors_re,
-        fcn=exp_power_fcn,
+        fcn=exp_fcn,
         maxit=10000,
         svdcut=1e-100,
         fitter="scipy_least_squares",
@@ -121,7 +179,7 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
     fit_result_im = lsf.nonlinear_fit(
         data=(lam_im_fit, im_fit),
         prior=priors_im,
-        fcn=exp_power_fcn,
+        fcn=exp_fcn,
         maxit=10000,
         svdcut=1e-100,
         fitter="scipy_least_squares",
@@ -129,20 +187,20 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
 
     if fit_result_re.Q < 0.05:
         logging.warning(
-            f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}"
+            f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
     else:
         logging.info(
-            f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}"
+            f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
 
     if fit_result_im.Q < 0.05:
         logging.warning(
-            f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}"
+            f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
     else:
         logging.info(
-            f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}"
+            f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
 
     # * two parts: data points and extrapolated points
@@ -152,8 +210,8 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
 
     lam_ls_part2 = np.arange(lam_ls[fit_idx_range[0]], extrapolated_length, lam_gap)
 
-    re_gv_part2 = exp_poly_fcn(lam_ls_part2, fit_result_re.p)
-    im_gv_part2 = exp_poly_fcn(lam_ls_part2, fit_result_im.p)
+    re_gv_part2 = exp_fcn(lam_ls_part2, fit_result_re.p)
+    im_gv_part2 = exp_fcn(lam_ls_part2, fit_result_im.p)
     
     # *: standardize the way to do the extrapolation
     extrapolated_lam_ls = list(lam_ls_part1) + list(lam_ls_part2)
@@ -188,6 +246,332 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
         fit_result_re,
         fit_result_im,
     )
+
+
+def extrapolate_exp_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
+    """
+    Fit and extrapolate the quasi distribution at large lambda using simple exponential decay, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
+
+    Args:
+        lam_ls (list): lambda list
+        re_gv (list): gvar list of real part of quasi distribution
+        im_gv (list): gvar list of imag part of quasi distribution
+        fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+
+    Returns:
+        three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
+    """
+    exp_fcn = exp_poly_fcn
+    
+    lam_gap = abs(lam_ls[1] - lam_ls[0])  # the gap between two discrete lambda
+    
+    lam_re_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
+    lam_im_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
+    re_fit = re_gv[fit_idx_range[0] : fit_idx_range[1]]
+    im_fit = im_gv[fit_idx_range[0] : fit_idx_range[1]]
+
+    priors_re = exp_decay_prior()
+    # priors_re["b"] = gv.gvar(re_fit[0].mean, re_fit[0].mean / 2)
+    priors_im = exp_decay_prior()
+    # priors_im["b"] = gv.gvar(im_fit[0].mean, im_fit[0].mean / 2)
+
+    fit_result_re = lsf.nonlinear_fit(
+        data=(lam_re_fit, re_fit),
+        prior=priors_re,
+        fcn=exp_fcn,
+        maxit=10000,
+        svdcut=1e-100,
+        fitter="scipy_least_squares",
+    )
+
+    fit_result_im = lsf.nonlinear_fit(
+        data=(lam_im_fit, im_fit),
+        prior=priors_im,
+        fcn=exp_fcn,
+        maxit=10000,
+        svdcut=1e-100,
+        fitter="scipy_least_squares",
+    )
+
+    if fit_result_re.Q < 0.05:
+        logging.warning(
+            f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
+        )
+    else:
+        logging.info(
+            f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
+        )
+
+    if fit_result_im.Q < 0.05:
+        logging.warning(
+            f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
+        )
+    else:
+        logging.info(
+            f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
+        )
+
+    # * two parts: data points and extrapolated points
+    lam_ls_part1 = lam_ls[: fit_idx_range[0]]
+    re_gv_part1 = re_gv[: fit_idx_range[0]]
+    im_gv_part1 = im_gv[: fit_idx_range[0]]
+
+    lam_ls_part2 = np.arange(lam_ls[fit_idx_range[0]], extrapolated_length, lam_gap)
+
+    re_gv_part2 = exp_fcn(lam_ls_part2, fit_result_re.p)
+    im_gv_part2 = exp_fcn(lam_ls_part2, fit_result_im.p)
+    
+    # *: standardize the way to do the extrapolation
+    extrapolated_lam_ls = list(lam_ls_part1) + list(lam_ls_part2)
+    extrapolated_re_gv = list(re_gv_part1) + list(re_gv_part2)
+    extrapolated_im_gv = list(im_gv_part1) + list(im_gv_part2)
+    
+    # *: Smooth the connection point
+    # Define the number of points for gradual weighting
+    num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
+    
+    # Calculate weights for gradual transition
+    weights = np.linspace(0, 1, num_gradual_points)
+    
+    # Prepare lists for the weighted averages
+    weighted_re = []
+    weighted_im = []
+    
+    for i in range(num_gradual_points):
+        w = weights[i]
+        weighted_re.append(w * re_gv_part2[i] + (1 - w) * re_gv[fit_idx_range[0] + i])
+        weighted_im.append(w * im_gv_part2[i] + (1 - w) * im_gv[fit_idx_range[0] + i])
+    
+    # Combine the parts
+    extrapolated_re_gv = list(re_gv_part1) + weighted_re + list(re_gv_part2[num_gradual_points:])
+    extrapolated_im_gv = list(im_gv_part1) + weighted_im + list(im_gv_part2[num_gradual_points:])
+
+
+    return (
+        extrapolated_lam_ls,
+        extrapolated_re_gv,
+        extrapolated_im_gv,
+        fit_result_re,
+        fit_result_im,
+    )
+
+
+def extrapolate_exp_sin(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
+    """
+    Fit and extrapolate the quasi distribution at large lambda using simple exponential decay, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
+
+    Args:
+        lam_ls (list): lambda list
+        re_gv (list): gvar list of real part of quasi distribution
+        im_gv (list): gvar list of imag part of quasi distribution
+        fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+
+    Returns:
+        three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
+    """
+    exp_fcn = exp_sin_fcn
+    
+    lam_gap = abs(lam_ls[1] - lam_ls[0])  # the gap between two discrete lambda
+    
+    lam_re_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
+    lam_im_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
+    re_fit = re_gv[fit_idx_range[0] : fit_idx_range[1]]
+    im_fit = im_gv[fit_idx_range[0] : fit_idx_range[1]]
+
+    priors_re = exp_decay_prior()
+    # priors_re["a"] = gv.gvar(re_fit[0].mean, re_fit[0].mean / 2)
+    priors_im = exp_decay_prior()
+    # priors_im["a"] = gv.gvar(im_fit[0].mean, im_fit[0].mean / 2)
+
+    fit_result_re = lsf.nonlinear_fit(
+        data=(lam_re_fit, re_fit),
+        prior=priors_re,
+        fcn=exp_fcn,
+        maxit=10000,
+        svdcut=1e-100,
+        fitter="scipy_least_squares",
+    )
+
+    fit_result_im = lsf.nonlinear_fit(
+        data=(lam_im_fit, im_fit),
+        prior=priors_im,
+        fcn=exp_fcn,
+        maxit=10000,
+        svdcut=1e-100,
+        fitter="scipy_least_squares",
+    )
+
+    if fit_result_re.Q < 0.05:
+        logging.warning(
+            f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
+        )
+    else:
+        logging.info(
+            f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
+        )
+
+    if fit_result_im.Q < 0.05:
+        logging.warning(
+            f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
+        )
+    else:
+        logging.info(
+            f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
+        )
+
+    # * two parts: data points and extrapolated points
+    lam_ls_part1 = lam_ls[: fit_idx_range[0]]
+    re_gv_part1 = re_gv[: fit_idx_range[0]]
+    im_gv_part1 = im_gv[: fit_idx_range[0]]
+
+    lam_ls_part2 = np.arange(lam_ls[fit_idx_range[0]], extrapolated_length, lam_gap)
+
+    re_gv_part2 = exp_fcn(lam_ls_part2, fit_result_re.p)
+    im_gv_part2 = exp_fcn(lam_ls_part2, fit_result_im.p)
+    
+    # *: standardize the way to do the extrapolation
+    extrapolated_lam_ls = list(lam_ls_part1) + list(lam_ls_part2)
+    extrapolated_re_gv = list(re_gv_part1) + list(re_gv_part2)
+    extrapolated_im_gv = list(im_gv_part1) + list(im_gv_part2)
+    
+    # *: Smooth the connection point
+    # Define the number of points for gradual weighting
+    num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
+    
+    # Calculate weights for gradual transition
+    weights = np.linspace(0, 1, num_gradual_points)
+    
+    # Prepare lists for the weighted averages
+    weighted_re = []
+    weighted_im = []
+    
+    for i in range(num_gradual_points):
+        w = weights[i]
+        weighted_re.append(w * re_gv_part2[i] + (1 - w) * re_gv[fit_idx_range[0] + i])
+        weighted_im.append(w * im_gv_part2[i] + (1 - w) * im_gv[fit_idx_range[0] + i])
+    
+    # Combine the parts
+    extrapolated_re_gv = list(re_gv_part1) + weighted_re + list(re_gv_part2[num_gradual_points:])
+    extrapolated_im_gv = list(im_gv_part1) + weighted_im + list(im_gv_part2[num_gradual_points:])
+
+
+    return (
+        extrapolated_lam_ls,
+        extrapolated_re_gv,
+        extrapolated_im_gv,
+        fit_result_re,
+        fit_result_im,
+    )
+
+
+
+def extrapolate_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
+    """
+    Fit and extrapolate the quasi distribution at large lambda using simple exponential decay, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
+
+    Args:
+        lam_ls (list): lambda list
+        re_gv (list): gvar list of real part of quasi distribution
+        im_gv (list): gvar list of imag part of quasi distribution
+        fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+
+    Returns:
+        three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
+    """
+    exp_fcn = poly_fcn
+    
+    lam_gap = abs(lam_ls[1] - lam_ls[0])  # the gap between two discrete lambda
+    
+    lam_re_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
+    lam_im_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
+    re_fit = re_gv[fit_idx_range[0] : fit_idx_range[1]]
+    im_fit = im_gv[fit_idx_range[0] : fit_idx_range[1]]
+
+    priors_re = exp_decay_prior()
+    # priors_re["a"] = gv.gvar(re_fit[0].mean, re_fit[0].mean / 2)
+    priors_im = exp_decay_prior()
+    # priors_im["a"] = gv.gvar(im_fit[0].mean, im_fit[0].mean / 2)
+
+    fit_result_re = lsf.nonlinear_fit(
+        data=(lam_re_fit, re_fit),
+        prior=priors_re,
+        fcn=exp_fcn,
+        maxit=10000,
+        svdcut=1e-100,
+        fitter="scipy_least_squares",
+    )
+
+    fit_result_im = lsf.nonlinear_fit(
+        data=(lam_im_fit, im_fit),
+        prior=priors_im,
+        fcn=exp_fcn,
+        maxit=10000,
+        svdcut=1e-100,
+        fitter="scipy_least_squares",
+    )
+
+    if fit_result_re.Q < 0.05:
+        logging.warning(
+            f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
+        )
+    else:
+        logging.info(
+            f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
+        )
+
+    if fit_result_im.Q < 0.05:
+        logging.warning(
+            f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
+        )
+    else:
+        logging.info(
+            f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
+        )
+
+    # * two parts: data points and extrapolated points
+    lam_ls_part1 = lam_ls[: fit_idx_range[0]]
+    re_gv_part1 = re_gv[: fit_idx_range[0]]
+    im_gv_part1 = im_gv[: fit_idx_range[0]]
+
+    lam_ls_part2 = np.arange(lam_ls[fit_idx_range[0]], extrapolated_length, lam_gap)
+
+    re_gv_part2 = exp_fcn(lam_ls_part2, fit_result_re.p)
+    im_gv_part2 = exp_fcn(lam_ls_part2, fit_result_im.p)
+    
+    # *: standardize the way to do the extrapolation
+    extrapolated_lam_ls = list(lam_ls_part1) + list(lam_ls_part2)
+    extrapolated_re_gv = list(re_gv_part1) + list(re_gv_part2)
+    extrapolated_im_gv = list(im_gv_part1) + list(im_gv_part2)
+    
+    # *: Smooth the connection point
+    # Define the number of points for gradual weighting
+    num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
+    
+    # Calculate weights for gradual transition
+    weights = np.linspace(0, 1, num_gradual_points)
+    
+    # Prepare lists for the weighted averages
+    weighted_re = []
+    weighted_im = []
+    
+    for i in range(num_gradual_points):
+        w = weights[i]
+        weighted_re.append(w * re_gv_part2[i] + (1 - w) * re_gv[fit_idx_range[0] + i])
+        weighted_im.append(w * im_gv_part2[i] + (1 - w) * im_gv[fit_idx_range[0] + i])
+    
+    # Combine the parts
+    extrapolated_re_gv = list(re_gv_part1) + weighted_re + list(re_gv_part2[num_gradual_points:])
+    extrapolated_im_gv = list(im_gv_part1) + weighted_im + list(im_gv_part2[num_gradual_points:])
+
+
+    return (
+        extrapolated_lam_ls,
+        extrapolated_re_gv,
+        extrapolated_im_gv,
+        fit_result_re,
+        fit_result_im,
+    )
+
 
 
 def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapolated_re_gv, extrapolated_im_gv, fit_idx_range, title, xlim=[-1, 25], save_path=None):      
@@ -239,14 +623,14 @@ def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapo
     # * plot the real part
     fig, ax = default_plot()
     ax.errorbar(
-        lam_ls, [v.mean for v in re_gv], [v.sdev for v in re_gv], label="data", **errorb
+        lam_ls, [v.mean for v in re_gv], [v.sdev for v in re_gv], label="Data", **errorb
     )
     ax.fill_between(
         extrapolated_lam_ls,
         [v.mean - v.sdev for v in extrapolated_re_gv],
         [v.mean + v.sdev for v in extrapolated_re_gv],
         alpha=0.4,
-        label="extrapolated",
+        label="Extrapolated",
     )
 
     ax.axvline(lam_ls[fit_idx_range[0]], ymin=0, ymax=0.5, color=red, linestyle="--")
@@ -264,7 +648,7 @@ def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapo
         )
     )
     ax.set_xlim(xlim)
-    plt.title(title + " Real", **fs_p)
+    # plt.title(title + " Real", **fs_p)
     plt.legend(**fs_p)
     if save_path is not None:
         plt.tight_layout()
@@ -273,14 +657,14 @@ def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapo
     # * plot the imag part
     fig, ax = default_plot()
     ax.errorbar(
-        lam_ls, [v.mean for v in im_gv], [v.sdev for v in im_gv], label="data", **errorb
+        lam_ls, [v.mean for v in im_gv], [v.sdev for v in im_gv], label="Data", **errorb
     )
     ax.fill_between(
         extrapolated_lam_ls,
         [v.mean - v.sdev for v in extrapolated_im_gv],
         [v.mean + v.sdev for v in extrapolated_im_gv],
         alpha=0.4,
-        label="extrapolated",
+        label="Extrapolated",
     )
 
     ax.axvline(lam_ls[fit_idx_range[0]], ymin=0, ymax=0.5, color=red, linestyle="--")
@@ -298,7 +682,7 @@ def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapo
         )
     )
     ax.set_xlim(xlim)
-    plt.title(title + "_imag", **fs_p)
+    # plt.title(title + "_imag", **fs_p)
     plt.legend(**fs_p)
 
     if save_path is not None:

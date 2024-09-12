@@ -38,5 +38,8 @@ def fh_fit():
     priors = gv.BufferDict()
     priors["pdf_re"] = gv.gvar(0, 10)
     priors["pdf_im"] = gv.gvar(0, 10)
+    priors["d1"] = gv.gvar(1, 10)
+    priors["d2"] = gv.gvar(1, 10)
+    priors["log(dE1)"] = gv.gvar(0, 10)
 
     return priors

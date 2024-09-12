@@ -83,9 +83,6 @@ def sum_two_state_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label, pt2_fi
     # Set 2pt fit results as priors
     if pt2_fit_res is not None:
         priors.update( {key: pt2_fit_res.p[key] for key in ["log(dE1)"]} )
-    #     dE1 = gv.mean(np.exp(pt2_fit_res.p['log(dE1)']))
-    # else:
-    #     dE1 = None
         
     px = id_label["px"]
     py = id_label["py"]

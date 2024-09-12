@@ -117,3 +117,11 @@ def fh_re_fcn(t, p):
 def fh_im_fcn(t, p):
     val = p["pdf_im"] + t * 0
     return val
+
+def fh_re_2state_fcn(t, tau_cut, p):
+    val = p["pdf_re"] + p["d2"] * (np.exp(-p["dE1"] * t - p["dE1"]) - np.exp(-p["dE1"] * t)) + p["pdf_re"] * p["d1"] * np.exp(-p["dE1"] * t - p["dE1"]) * (1 - (np.exp(p["dE1"]) - 1) * (t - 2 * tau_cut + 1))
+    return val
+
+def fh_im_2state_fcn(t, tau_cut, p):
+    val = p["pdf_im"] + p["d2"] * (np.exp(-p["dE1"] * t - p["dE1"]) - np.exp(-p["dE1"] * t)) + p["pdf_im"] * p["d1"] * np.exp(-p["dE1"] * t - p["dE1"]) * (1 - (np.exp(p["dE1"]) - 1) * (t - 2 * tau_cut + 1))
+    return val

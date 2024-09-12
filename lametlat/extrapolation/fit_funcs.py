@@ -15,7 +15,7 @@ def exp_poly_fcn(lam_ls, p):
     Returns:
         val: function value
     """
-    return ( p["b"] + p["c"] * lam_ls + p["d"] * lam_ls**2 + p["e"] * lam_ls**3 ) * np.exp( -lam_ls * ( p["m"] ) ) / ( lam_ls**4 )
+    return ( p["b"] + p["c"] * lam_ls + p["d"] * lam_ls**2 + p["e"] * lam_ls**3 ) * np.exp( -lam_ls * p["m"] ) / ( lam_ls**(3 + p["n"]) )
 
 
 def exp_power_fcn(lam_ls, p):
@@ -29,7 +29,7 @@ def exp_power_fcn(lam_ls, p):
     Returns:
         val: function value
     """
-    return p["a"] * np.exp( -lam_ls * ( p["m"] ) ) / ( lam_ls**p["n"] )
+    return p["a"] * np.exp( -lam_ls * p["m"] ) / ( lam_ls**p["n"] )
 
 
 
@@ -44,7 +44,7 @@ def exp_sin_fcn(lam_ls, p):
     Returns:
         val: function value
     """
-    return ( p["b"] * np.sin(p["c"] * lam_ls + p["d"]) ) * np.exp( -lam_ls * ( p["m"] ) ) / ( lam_ls**p["n"] )
+    return ( p["b"] * np.sin(p["c"] * lam_ls + p["d"]) ) * np.exp( -lam_ls * p["m"] ) / ( lam_ls**p["n"] )
 
 def poly_fcn(lam_ls, p):
     """
