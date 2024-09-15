@@ -109,12 +109,14 @@ def jk_ls_avg(jk_ls):
     # * if only one variable, use standard deviation
     if len(shape) == 1:
         sdev = np.std(jk_ls, axis=0) * np.sqrt(N_sample - 1)
-        gv_ls = gv.gvar(mean, sdev)
+        gv_ls = gv.gvar(mean, sdev)[0]
+
     else:
         cov = np.cov(jk_ls, rowvar=False) * (N_sample - 1)
         gv_ls = gv.gvar(mean, cov)
+        gv_ls = np.reshape(gv_ls, shape[1:])
 
-    return np.reshape(gv_ls, shape[1:])
+    return gv_ls
 
 
 def jk_dic_avg(dic):
@@ -168,12 +170,14 @@ def bs_ls_avg(bs_ls):
     # * if only one variable, use standard deviation
     if len(shape) == 1:
         sdev = np.std(bs_ls, axis=0)
-        gv_ls = gv.gvar(mean, sdev)
+        gv_ls = gv.gvar(mean, sdev)[0]
+
     else:
         cov = np.cov(bs_ls, rowvar=False)
         gv_ls = gv.gvar(mean, cov)
+        gv_ls = np.reshape(gv_ls, shape[1:])
 
-    return np.reshape(gv_ls, shape[1:])
+    return gv_ls
 
 
 def bs_dic_avg(dic):
