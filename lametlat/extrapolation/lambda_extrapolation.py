@@ -11,7 +11,7 @@ from lametlat.utils.plot_settings import *
 from lametlat.extrapolation.fit_funcs import *
 from lametlat.extrapolation.prior_setting import *
 
-def extrapolate_no_fit(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
+def extrapolate_no_fit(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200, weight_ini=0):
     """
     Extrapolate the quasi distribution at large lambda with no fit, just do a weighted average between the data points and zero in the fit region, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
 
@@ -20,6 +20,8 @@ def extrapolate_no_fit(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=
         re_gv (list): gvar list of real part of quasi distribution
         im_gv (list): gvar list of imag part of quasi distribution
         fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+        extrapolated_length (int): the maximum lambda value of the extrapolation
+        weight_ini (float): the initial weight of the fit part in the fit region
 
     Returns:
         three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
@@ -44,7 +46,7 @@ def extrapolate_no_fit(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=
     num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
     
     # Calculate weights for gradual transition
-    weights = np.linspace(0, 1, num_gradual_points)
+    weights = np.linspace(weight_ini, 1, num_gradual_points) #todo
     
     # Prepare lists for the weighted averages
     weighted_re = []
@@ -80,6 +82,7 @@ def extrapolate_Regge(
         re_gv (list): gvar list of real part of quasi distribution
         im_gv (list): gvar list of imag part of quasi distribution
         fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+        extrapolated_length (int): the maximum lambda value of the extrapolation
 
     Returns:
         three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
@@ -141,7 +144,7 @@ def extrapolate_Regge(
     return extrapolated_lam_ls, extrapolated_re_gv, extrapolated_im_gv, fit_result
 
 
-def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
+def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200, weight_ini=0):
     """
     Fit and extrapolate the quasi distribution at large lambda using simple exponential decay, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
 
@@ -150,6 +153,8 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
         re_gv (list): gvar list of real part of quasi distribution
         im_gv (list): gvar list of imag part of quasi distribution
         fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+        extrapolated_length (int): the maximum lambda value of the extrapolation
+        weight_ini (float): the initial weight of the fit part in the fit region
 
     Returns:
         three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
@@ -224,7 +229,7 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
     num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
     
     # Calculate weights for gradual transition
-    weights = np.linspace(0, 1, num_gradual_points)
+    weights = np.linspace(weight_ini, 1, num_gradual_points)
     
     # Prepare lists for the weighted averages
     weighted_re = []
@@ -249,7 +254,7 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
     )
 
 
-def extrapolate_exp_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
+def extrapolate_exp_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200, weight_ini=0):
     """
     Fit and extrapolate the quasi distribution at large lambda using simple exponential decay, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
 
@@ -258,6 +263,8 @@ def extrapolate_exp_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_lengt
         re_gv (list): gvar list of real part of quasi distribution
         im_gv (list): gvar list of imag part of quasi distribution
         fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+        extrapolated_length (int): the maximum lambda value of the extrapolation
+        weight_ini (float): the initial weight of the fit part in the fit region
 
     Returns:
         three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
@@ -332,7 +339,7 @@ def extrapolate_exp_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_lengt
     num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
     
     # Calculate weights for gradual transition
-    weights = np.linspace(0, 1, num_gradual_points)
+    weights = np.linspace(weight_ini, 1, num_gradual_points)
     
     # Prepare lists for the weighted averages
     weighted_re = []
@@ -357,7 +364,7 @@ def extrapolate_exp_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_lengt
     )
 
 
-def extrapolate_exp_sin(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
+def extrapolate_exp_sin(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200, weight_ini=0):
     """
     Fit and extrapolate the quasi distribution at large lambda using simple exponential decay, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
 
@@ -366,6 +373,8 @@ def extrapolate_exp_sin(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length
         re_gv (list): gvar list of real part of quasi distribution
         im_gv (list): gvar list of imag part of quasi distribution
         fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+        extrapolated_length (int): the maximum lambda value of the extrapolation
+        weight_ini (float): the initial weight of the fit part in the fit region
 
     Returns:
         three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
@@ -440,7 +449,7 @@ def extrapolate_exp_sin(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length
     num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
     
     # Calculate weights for gradual transition
-    weights = np.linspace(0, 1, num_gradual_points)
+    weights = np.linspace(weight_ini, 1, num_gradual_points)
     
     # Prepare lists for the weighted averages
     weighted_re = []
@@ -466,7 +475,7 @@ def extrapolate_exp_sin(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length
 
 
 
-def extrapolate_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
+def extrapolate_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200, weight_ini=0):
     """
     Fit and extrapolate the quasi distribution at large lambda using simple exponential decay, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
 
@@ -475,6 +484,8 @@ def extrapolate_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=20
         re_gv (list): gvar list of real part of quasi distribution
         im_gv (list): gvar list of imag part of quasi distribution
         fit_idx_range (list): two int numbers, [0] is the start index, [1] is the end index, indicating the lambda range included in the fit
+        extrapolated_length (int): the maximum lambda value of the extrapolation
+        weight_ini (float): the initial weight of the fit part in the fit region
 
     Returns:
         three lists after extrapolation: lambda list, real part of quasi distribution, imag part of quasi distribution
@@ -549,7 +560,7 @@ def extrapolate_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=20
     num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
     
     # Calculate weights for gradual transition
-    weights = np.linspace(0, 1, num_gradual_points)
+    weights = np.linspace(weight_ini, 1, num_gradual_points)
     
     # Prepare lists for the weighted averages
     weighted_re = []
