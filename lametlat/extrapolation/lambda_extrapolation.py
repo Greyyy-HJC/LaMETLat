@@ -13,7 +13,7 @@ from lametlat.extrapolation.prior_setting import *
 
 def extrapolate_no_fit(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200):
     """
-    Fit and extrapolate the quasi distribution at large lambda using simple exponential decay, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
+    Extrapolate the quasi distribution at large lambda with no fit, just do a weighted average between the data points and zero in the fit region, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
 
     Args:
         lam_ls (list): lambda list
@@ -33,6 +33,7 @@ def extrapolate_no_fit(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=
 
     lam_ls_part2 = np.arange(lam_ls[fit_idx_range[0]], extrapolated_length, lam_gap)
 
+    # *: extrapolate the data points to weighted average with zero
     re_gv_part2 = [gv.gvar(0, 0) for _ in range(len(lam_ls_part2))]
     im_gv_part2 = [gv.gvar(0, 0) for _ in range(len(lam_ls_part2))]
     
