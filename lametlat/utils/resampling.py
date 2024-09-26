@@ -129,13 +129,15 @@ def jk_dic_avg(dic):
         dict: dict of gvar list after averaging
     """
     # * length of each key
-    l_dic = {key: len(dic[key][0]) for key in dic}
+    key_ls = list(dic.keys())
+    l_dic = {key: len(dic[key][0]) for key in key_ls}
+    N_conf = len(dic[key_ls[0]])
 
     conf_ls = []
-    for n_conf in range(len(dic[key])):
+    for n in range(N_conf):
         temp = []
         for key in dic:
-            temp.append(list(dic[key][n_conf]))
+            temp.append(list(dic[key][n]))
 
         conf_ls.append(sum(temp, []))  # * flatten the list
 
