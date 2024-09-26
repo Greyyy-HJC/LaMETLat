@@ -1,7 +1,7 @@
 """
 FT and inverse FT, using the convention in Peskin.
 """
-
+# %%
 import numpy as np
 
 # * Without numba is even faster
@@ -155,3 +155,5 @@ if __name__ == "__main__":
         np.max(np.abs(fx - fx_reconstructed)),
     )
     print(f"Total time used: {total_time:.4f} seconds")
+
+# %%
