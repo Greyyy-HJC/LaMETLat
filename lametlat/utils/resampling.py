@@ -2,7 +2,7 @@
 Here are functions related to resampling, including bootstrap and jackknife.
 You can find an example usage at the end of this file.
 """
-
+# %%
 import numpy as np
 import gvar as gv
 
@@ -78,13 +78,13 @@ def jackknife(data, axis=0):
         array: jackknife samples
     """
     data = np.array(data)
-
     N_conf = data.shape[axis]
-    temp = np.swapaxes(data, 0, axis)
-    conf_jk = [np.delete(temp, i, axis=0) for i in range(N_conf)]
-    jk_ls = np.mean(conf_jk, axis=1)
-
-    jk_ls = np.swapaxes(jk_ls, 0, axis)
+    
+    # Calculate the sum of all data points
+    total_sum = np.sum(data, axis=axis, keepdims=True)
+    
+    # Calculate jackknife samples without storing all configurations
+    jk_ls = (total_sum - data) / (N_conf - 1)
 
     return jk_ls
 
@@ -276,9 +276,14 @@ if __name__ == "__main__":
     check these functions can work normally
     you should get a plot with three sets of errorbar, which are almost the same
     """
-
-    # generate a 2 dimensional x list to test bootstrap function
+    
+    # generate a 2 dimensional x list to test jackknife function
     x = np.random.rand(100, 10)
+    jk = jackknife(x, axis=0)
+    print(">>> Jackknife: ")
+    print(jk_ls_avg(jk)) 
+
+    # test bootstrap function
 
     bs, conf_bs = bootstrap(x, 50, axis=0)
     print(np.shape(bs))
@@ -286,6 +291,8 @@ if __name__ == "__main__":
     gv_ls_1 = gv.dataset.avg_data(bs, bstrap=True)
 
     gv_ls_2 = bs_ls_avg(bs)
+    print(">>> Bootstrap: ")
+    print(gv_ls_2)
 
     distribution = gv_ls_to_samples_corr(gv_ls_2, 100)
 
@@ -321,3 +328,5 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.show()
+
+# %%

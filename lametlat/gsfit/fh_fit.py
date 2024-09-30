@@ -36,14 +36,16 @@ def fh_one_state_fit(fh_re_avg, fh_im_avg, tsep_ls, id_label):
 
     # * fit function
     def fcn(x, p):
-        t = x["re"]
-        re = fh_re_fcn(t, p)
-        im = fh_im_fcn(t, p)
+        re = fh_re_fcn(x["re"], p)
+        im = fh_im_fcn(x["im"], p)
         val = {"re": re, "im": im}
         return val
 
     x_dic = {"re": np.array(tsep_ls)[:-1], "im": np.array(tsep_ls)[:-1]} # * Note here because we are fitting FH = sum(t + 1) - sum(t)
     y_dic = {"re": fh_re_avg, "im": fh_im_avg}
+    #todo
+    # x_dic = {"re": np.array(tsep_ls)[1:-1], "im": np.array(tsep_ls)[:-1]} # * Note here because we are fitting FH = sum(t + 1) - sum(t)
+    # y_dic = {"re": fh_re_avg[1:], "im": fh_im_avg}
     fh_fit_res = lsf.nonlinear_fit(
         data=(x_dic, y_dic), prior=priors, fcn=fcn, maxit=10000
     )
