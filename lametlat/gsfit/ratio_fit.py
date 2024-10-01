@@ -82,11 +82,9 @@ def ra_two_state_fit(
 
 def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep_ls, Lt, id_label, err_tau_cut=1, fill_tau_cut=1):
 
-    px = id_label["px"]
-    py = id_label["py"]
-    pz = id_label["pz"]
-    b = id_label["b"]
-    z = id_label["z"]
+    id_label_str = ""
+    for key in id_label:
+        id_label_str += f"{key} = {id_label[key]}, "
  
     def plot_part(part, ra_avg, ra_fcn, pdf_key):
         
@@ -120,7 +118,7 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
         ax.set_ylabel(r'$\mathcal{R}$', **fs_p)
         ax.set_ylim(auto_ylim([err_y_ls, fill_y_ls, band_y_ls], [err_yerr_ls, fill_yerr_ls, band_yerr_ls]))
         ax.legend(ncol=2, **fs_p)
-        ax.set_title(f'PX = {px}, PY={py}, PZ={pz}, z={z}, b={b}, {part}', **fs_p)
+        ax.set_title(f'{id_label_str}, {part}', **fs_p)
         plt.tight_layout()
         
         return ax

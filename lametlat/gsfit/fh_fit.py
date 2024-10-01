@@ -118,11 +118,9 @@ def fh_two_state_fit(fh_re_avg, fh_im_avg, tsep_ls, tau_cut, id_label, pt2_fit_r
 
 def plot_fh_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fill_tsep_ls, id_label):
     
-    px = id_label["px"]
-    py = id_label["py"]
-    pz = id_label["pz"]
-    b = id_label["b"]
-    z = id_label["z"]
+    id_label_str = ""
+    for key in id_label:
+        id_label_str += f"{key} = {id_label[key]}, "
 
     def plot_part(part, fh_avg, fh_fcn):
         
@@ -138,7 +136,7 @@ def plot_fh_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fill_tsep
         ax.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
         ax.set_ylabel(r'$FH$', **fs_p)
         ax.legend(**fs_p)
-        ax.set_title(f'PX = {px}, PY={py}, PZ={pz}, z={z}, b={b}, {part}', **fs_p)
+        ax.set_title(f'{id_label_str}, {part}', **fs_p)
         ax.set_ylim(auto_ylim([gv.mean(fh_avg), gv.mean(fit_fh)], [gv.sdev(fh_avg), gv.sdev(fit_fh)]))
         plt.tight_layout()
         
@@ -151,11 +149,9 @@ def plot_fh_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fill_tsep
 
 def plot_fh_2state_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fill_tsep_ls, tau_cut, id_label):
     
-    px = id_label["px"]
-    py = id_label["py"]
-    pz = id_label["pz"]
-    b = id_label["b"]
-    z = id_label["z"]
+    id_label_str = ""
+    for key in id_label:
+        id_label_str += f"{key} = {id_label[key]}, "
 
     def plot_part(part, fh_avg, fh_fcn):
         
@@ -171,7 +167,7 @@ def plot_fh_2state_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fi
         ax.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
         ax.set_ylabel(r'$FH$', **fs_p)
         ax.legend(**fs_p)
-        ax.set_title(f'PX = {px}, PY={py}, PZ={pz}, z={z}, b={b}, {part}', **fs_p)
+        ax.set_title(f'{id_label_str}, {part}', **fs_p)
         ax.set_ylim(auto_ylim([gv.mean(fh_avg), gv.mean(fit_fh)], [gv.sdev(fh_avg), gv.sdev(fit_fh)]))
         plt.tight_layout()
         

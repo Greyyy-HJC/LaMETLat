@@ -118,11 +118,9 @@ def sum_two_state_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label, pt2_fi
 
 def plot_sum_fit_on_data(sum_re_avg, sum_im_avg, sum_fit_res, err_tsep_ls, fill_tsep_ls, id_label, tau_cut):
     
-    px = id_label["px"]
-    py = id_label["py"]
-    pz = id_label["pz"]
-    b = id_label["b"]
-    z = id_label["z"]
+    id_label_str = ""
+    for key in id_label:
+        id_label_str += f"{key} = {id_label[key]}, "
 
     def plot_part(part, sum_avg, sum_fcn):
         
@@ -138,7 +136,7 @@ def plot_sum_fit_on_data(sum_re_avg, sum_im_avg, sum_fit_res, err_tsep_ls, fill_
         ax.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
         ax.set_ylabel(r'$\mathcal{S}$', **fs_p)
         ax.legend(**fs_p)
-        ax.set_title(f'PX = {px}, PY={py}, PZ={pz}, z={z}, b={b}, {part}', **fs_p)
+        ax.set_title(f'{id_label_str}, {part}', **fs_p)
         ax.set_ylim(auto_ylim([gv.mean(sum_avg), gv.mean(fit_sum)], [gv.sdev(sum_avg), gv.sdev(fit_sum)]))
         plt.tight_layout()
         
