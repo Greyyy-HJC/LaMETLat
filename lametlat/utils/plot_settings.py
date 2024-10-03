@@ -76,7 +76,7 @@ def auto_ylim(y_data, yerr_data, y_range_ratio=4):
     Args:
         y_data (list): List of y-values.
         yerr_data (list): List of y-error values.
-        y_range_ratio (float): Ratio of the y-range to the data range, default is 4.
+        y_range_ratio (float): The upper and lower blank space will be 1/y_range_ratio times of the data range.
 
     Returns:
         tuple: y-axis limits (y_min, y_max).
