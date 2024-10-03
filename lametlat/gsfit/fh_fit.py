@@ -136,7 +136,7 @@ def plot_fh_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fill_tsep
         ax.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
         ax.set_ylabel(r'$FH$', **fs_p)
         ax.legend(**fs_p)
-        ax.set_title(f'{id_label_str}, {part}', **fs_p)
+        ax.set_title(f'{id_label_str}{part}', **fs_p)
         ax.set_ylim(auto_ylim([gv.mean(fh_avg), gv.mean(fit_fh)], [gv.sdev(fh_avg), gv.sdev(fit_fh)]))
         plt.tight_layout()
         
@@ -167,7 +167,7 @@ def plot_fh_2state_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fi
         ax.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
         ax.set_ylabel(r'$FH$', **fs_p)
         ax.legend(**fs_p)
-        ax.set_title(f'{id_label_str}, {part}', **fs_p)
+        ax.set_title(f'{id_label_str}{part}', **fs_p)
         ax.set_ylim(auto_ylim([gv.mean(fh_avg), gv.mean(fit_fh)], [gv.sdev(fh_avg), gv.sdev(fit_fh)]))
         plt.tight_layout()
         

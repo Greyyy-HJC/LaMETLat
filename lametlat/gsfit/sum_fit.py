@@ -136,7 +136,7 @@ def plot_sum_fit_on_data(sum_re_avg, sum_im_avg, sum_fit_res, err_tsep_ls, fill_
         ax.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
         ax.set_ylabel(r'$\mathcal{S}$', **fs_p)
         ax.legend(**fs_p)
-        ax.set_title(f'{id_label_str}, {part}', **fs_p)
+        ax.set_title(f'{id_label_str}{part}', **fs_p)
         ax.set_ylim(auto_ylim([gv.mean(sum_avg), gv.mean(fit_sum)], [gv.sdev(sum_avg), gv.sdev(fit_sum)]))
         plt.tight_layout()
         

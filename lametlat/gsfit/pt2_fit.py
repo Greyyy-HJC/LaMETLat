@@ -73,7 +73,7 @@ def plot_2pt_fit_on_meff(pt2_avg, pt2_fit_res, err_t_ls, fill_t_ls, id_label, Lt
     ax.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
     ax.set_ylabel(r'$m_{\mathrm{eff}}$', **fs_p)
     ax.legend(**fs_p)
-    ax.set_title(f'{id_label_str}, meff', **fs_p)
+    ax.set_title(f'{id_label_str}meff', **fs_p)
     plt.tight_layout()
     plt.show()
     

@@ -118,7 +118,7 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
         ax.set_ylabel(r'$\mathcal{R}$', **fs_p)
         ax.set_ylim(auto_ylim([err_y_ls, fill_y_ls, band_y_ls], [err_yerr_ls, fill_yerr_ls, band_yerr_ls]))
         ax.legend(ncol=2, **fs_p)
-        ax.set_title(f'{id_label_str}, {part}', **fs_p)
+        ax.set_title(f'{id_label_str}{part}', **fs_p)
         plt.tight_layout()
         
         return ax
