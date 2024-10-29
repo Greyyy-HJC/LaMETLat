@@ -61,15 +61,15 @@ def plot_da_fit_on_ratio(pt2_avg, pt2_fit_res, da_re_avg, da_im_avg, da_fit_res,
     for key in id_label:
         id_label_str += f"{key} = {id_label[key]}, "
         
-    data_ratio_re = -1j * da_re_avg / pt2_avg
-    data_ratio_im = -1j * da_im_avg / pt2_avg
+    data_ratio_re = da_re_avg / pt2_avg
+    data_ratio_im = da_im_avg / pt2_avg
 
     fit_pt2 = pt2_re_fcn(fill_t_ls, pt2_fit_res.p, Lt)
     fit_da_re = da_re_fcn(fill_t_ls, da_fit_res.p, Lt)
     fit_da_im = da_im_fcn(fill_t_ls, da_fit_res.p, Lt)
     
-    fit_ratio_re = -1j * fit_da_re / fit_pt2
-    fit_ratio_im = -1j * fit_da_im / fit_pt2
+    fit_ratio_re = fit_da_re / fit_pt2
+    fit_ratio_im = fit_da_im / fit_pt2
     
     fig, ax = default_plot()
     ax.errorbar(err_t_ls, gv.mean(data_ratio_re), yerr=gv.sdev(data_ratio_re), label='Data', color=blue, **errorb)
@@ -78,6 +78,7 @@ def plot_da_fit_on_ratio(pt2_avg, pt2_fit_res, da_re_avg, da_im_avg, da_fit_res,
     ax.set_ylabel(r'$R_{\mathrm{DA}}$', **fs_p)
     ax.legend(**fs_p)
     ax.set_title(f'{id_label_str}R_DA_real', **fs_p)
+    ax.set_ylim(auto_ylim([gv.mean(data_ratio_re), gv.mean(fit_ratio_re)], [gv.sdev(data_ratio_re), gv.sdev(fit_ratio_re)]))
     plt.tight_layout()
     plt.show()
     
@@ -88,6 +89,7 @@ def plot_da_fit_on_ratio(pt2_avg, pt2_fit_res, da_re_avg, da_im_avg, da_fit_res,
     ax.set_ylabel(r'$R_{\mathrm{DA}}$', **fs_p)
     ax.legend(**fs_p)
     ax.set_title(f'{id_label_str}R_DA_imag', **fs_p)
+    ax.set_ylim(auto_ylim([gv.mean(data_ratio_im), gv.mean(fit_ratio_im)], [gv.sdev(data_ratio_im), gv.sdev(fit_ratio_im)]))
     plt.tight_layout()
     plt.show()
     
