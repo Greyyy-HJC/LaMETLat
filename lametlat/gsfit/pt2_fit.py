@@ -8,8 +8,7 @@ from lametlat.gsfit.prior_setting import two_state_fit
 from lametlat.utils.plot_settings import *
 
 
-
-def pt2_two_state_fit(pt2_avg, tmin, tmax, Lt, label=None):
+def pt2_two_state_fit(pt2_avg, tmin, tmax, Lt, normalize=True, label=None):
     """
     Perform a 2-point fit with two states.
 
@@ -18,6 +17,7 @@ def pt2_two_state_fit(pt2_avg, tmin, tmax, Lt, label=None):
         tmin (int): The minimum time value for the fit range.
         tmax (int): The maximum time value for the fit range.
         Lt (int): The temporal size of the lattice.
+        normalize (bool, optional): Whether to normalize the 2pt data. Defaults to True.
         label (str, optional): A label for the fit. Defaults to None.
 
     Returns:
@@ -37,9 +37,11 @@ def pt2_two_state_fit(pt2_avg, tmin, tmax, Lt, label=None):
     t_range = np.arange(tmin, tmax)
 
     # Normalize the 2pt data only once for each dataset
-    normalization_factor = pt2_avg[0]
-    fit_pt2 = pt2_avg[tmin:tmax] / normalization_factor
-
+    if normalize:
+        normalization_factor = pt2_avg[0]
+        fit_pt2 = pt2_avg[tmin:tmax] / normalization_factor
+    else:
+        fit_pt2 = pt2_avg[tmin:tmax]
     fit_res = lsf.nonlinear_fit(
         data=(t_range, fit_pt2), prior=priors, fcn=fcn, maxit=10000
     )

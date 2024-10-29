@@ -10,6 +10,8 @@ def two_state_fit():
 
     priors["pdf_re"] = gv.gvar(1, 10)
     priors["pdf_im"] = gv.gvar(1, 10)
+    priors["da_re"] = gv.gvar(1, 10)
+    priors["da_im"] = gv.gvar(1, 10)
     priors["O01_re"] = gv.gvar(1, 10)
     priors["O01_im"] = gv.gvar(1, 10)
     # priors["O10_re"] = gv.gvar(1, 10)
@@ -26,6 +28,8 @@ def summation_fit():
     priors = gv.BufferDict()
     priors["pdf_re"] = gv.gvar(0, 10)
     priors["pdf_im"] = gv.gvar(0, 10)
+    priors["da_re"] = gv.gvar(1, 10)
+    priors["da_im"] = gv.gvar(1, 10)
     priors['re_b1'] = gv.gvar(0, 10)
     priors['im_b1'] = gv.gvar(0, 10)
     priors['re_b2'] = gv.gvar(0, 10)

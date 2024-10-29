@@ -3,7 +3,7 @@ All kinds of fit functions for the gs fit.
 """
 
 import numpy as np
-
+import gvar as gv
 #! check to make sure be consistent with the paper
 def pt2_re_fcn(pt2_t, p, Lt):
     """
@@ -124,4 +124,32 @@ def fh_re_2state_fcn(t, tau_cut, p):
 
 def fh_im_2state_fcn(t, tau_cut, p):
     val = p["pdf_im"] + p["d2"] * (np.exp(-p["dE1"] * t - p["dE1"]) - np.exp(-p["dE1"] * t)) + p["pdf_im"] * p["d1"] * np.exp(-p["dE1"] * t - p["dE1"]) * (1 - (np.exp(p["dE1"]) - 1) * (t - 2 * tau_cut + 1))
+    return val
+
+# * This is for DA, TMDWF fit
+
+def da_re_fcn(da_t, p, Lt):
+    e0 = p["E0"]
+    e1 = p["E0"] + p["dE1"]
+    z0 = p["re_z0"]
+    z1 = p["re_z1"]
+    
+    z0_ = z0 / np.sqrt(2 * e0) # here we have zn = Zn / sqrt(2 * En)
+    z1_ = z1 / np.sqrt(2 * e1)
+    
+    val = z0_ * p["da_re"] * e0 * ( np.exp( -e0 * da_t ) + np.exp( -e0 * ( Lt - da_t ) ) ) + z1_ * p["O01_re"] * ( np.exp( -e1 * da_t ) + np.exp( -e1 * ( Lt - da_t ) ) )
+
+    return val
+
+def da_im_fcn(da_t, p, Lt):
+    e0 = p["E0"]
+    e1 = p["E0"] + p["dE1"]
+    z0 = p["re_z0"]
+    z1 = p["re_z1"]
+
+    z0_ = z0 / np.sqrt(2 * e0) # here we have zn = Zn / sqrt(2 * En)
+    z1_ = z1 / np.sqrt(2 * e1)
+
+    val = z0_ * p["da_im"] * e0 * ( np.exp( -e0 * da_t ) + np.exp( -e0 * ( Lt - da_t ) ) ) + z1_ * p["O01_im"] * ( np.exp( -e1 * da_t ) + np.exp( -e1 * ( Lt - da_t ) ) )
+
     return val

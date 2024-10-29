@@ -60,7 +60,7 @@ def pt2_to_meff(pt2_array, boundary="periodic"):
 
     Parameters:
     - pt2_array (ndarray): Array of pt2 values.
-    - boundary (str, optional): Boundary condition. Can be "periodic" or "anti-periodic". Defaults to "periodic".
+    - boundary (str, optional): Boundary condition. Can be "periodic" or "anti-periodic" or "none". Defaults to "periodic".
 
     Returns:
     - meff_array (ndarray): Array of meff values.
