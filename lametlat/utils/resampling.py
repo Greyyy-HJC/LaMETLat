@@ -89,7 +89,7 @@ def jackknife(data, axis=0):
     return jk_ls
 
 
-def jk_ls_avg(jk_ls):
+def jk_ls_avg(jk_ls, axis=0):
     """Average the jackknife list, the axis=0 is the jackknife samples.
 
     Args:
@@ -100,6 +100,9 @@ def jk_ls_avg(jk_ls):
         gvar list: gvar list after averaging
     """
     jk_ls = np.array(jk_ls)
+    # If axis is not 0, swap axes to make the jackknife samples on axis 0
+    if axis != 0:
+        jk_ls = np.swapaxes(jk_ls, 0, axis)
     shape = np.shape(jk_ls)
     jk_ls = np.reshape(jk_ls, (shape[0], -1))
 
@@ -153,7 +156,7 @@ def jk_dic_avg(dic):
     return gv_dic
 
 
-def bs_ls_avg(bs_ls):
+def bs_ls_avg(bs_ls, axis=0):
     """Average the bootstrap list, the axis=0 is the bootstrap samples.
 
     Args:
@@ -164,6 +167,9 @@ def bs_ls_avg(bs_ls):
         gvar list: gvar list after averaging
     """
     bs_ls = np.array(bs_ls)
+    # If axis is not 0, swap axes to make the bootstrap samples on axis 0
+    if axis != 0:
+        bs_ls = np.swapaxes(bs_ls, 0, axis)
     shape = np.shape(bs_ls)
     bs_ls = np.reshape(bs_ls, (shape[0], -1))
 
