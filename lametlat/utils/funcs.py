@@ -1,3 +1,4 @@
+# %%
 import h5py as h5
 import numpy as np
 import gvar as gv
@@ -58,25 +59,34 @@ def add_error_to_sample(sample_ls, jk_bs="bs"):
     cov = gv.evalcov(avg)
     return np.array([gv.gvar(sample, cov) for sample in sample_ls])
 
-def gv_ls_interpolate(x_ls, gv_ls, x_new, N_samp=100, method="cubic"):
+
+def gv_ls_interpolate(x_ls, gv_ls, x_ls_new, N_samp=100, method="cubic"):
     """
     Interpolate a list of gvar objects to a new x list.
 
     Args:
         x_ls (list): List of x values.
         gv_ls (list): List of gvar objects.
-        x_new (list): New x values to interpolate to.
+        x_ls_new (list): New x values to interpolate to.
         N_samp (int, optional): Number of samples. Defaults to 100.
         method (str, optional): Interpolation method. Defaults to "cubic".
 
     Returns:
-        gvar: Interpolated gvar object.
+        list: List of interpolated gvar objects.
 
     """
     x_array = np.array(x_ls)
     y_ls_samp = gv_ls_to_samples_corr(gv_ls, N_samp)
+
+    y_new_samp = []
+    for n in range(N_samp):
+        interp_func = interpolate.interp1d(x_array, y_ls_samp[n], kind=method)
+        y_new = interp_func(x_ls_new)
+        y_new_samp.append(y_new)
+
+    y_new_samp = np.squeeze(y_new_samp)
+    y_new_gv = bs_ls_avg(y_new_samp)
     
-    interp_func = interpolate.interp1d(x_array, y_ls_samp, axis=1, kind=method)
-    y_new_samp = interp_func(x_new)
-    
-    return bs_ls_avg(y_new_samp.T)
+    return y_new_gv
+
+# %%
