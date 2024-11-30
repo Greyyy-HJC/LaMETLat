@@ -7,7 +7,7 @@ from lametlat.utils.plot_settings import *
 from lametlat.utils.constants import *
 
 
-def disp_relation_plot(a, Ls, mom_ls, meff_ls, m0=None):
+def disp_relation_plot(a, Ls, mom_ls, meff_ls, m0=None, input_priors=None):
     """
     Plot the dispersion relation.
 
@@ -38,7 +38,11 @@ def disp_relation_plot(a, Ls, mom_ls, meff_ls, m0=None):
     else:
         priors["m"] = gv.gvar(1, 1)
     priors["c1"] = gv.gvar(1, 0.5)
-    priors["c2"] = gv.gvar(0, 0.5)   
+    priors["c2"] = gv.gvar(0, 0.5) 
+    
+    if input_priors is not None:
+        priors.update(input_priors)
+      
     fit_res = lsf.nonlinear_fit(data=(p_array, E_array), prior=priors, fcn=fcn)
     
     print(fit_res.format(100))
@@ -92,4 +96,4 @@ def disp_relation_plot(a, Ls, mom_ls, meff_ls, m0=None):
     
     plt.tight_layout()
     plt.show()
-    return fig
+    return fig, ax

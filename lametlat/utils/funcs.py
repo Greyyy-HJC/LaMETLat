@@ -36,6 +36,9 @@ def constant_fit(data):
     
     fit_res = lsf.nonlinear_fit(data=(x, data), prior=priors, fcn=fcn, maxit=10000, svdcut=1e-100, fitter='scipy_least_squares')
     
+    if fit_res.Q < 0.05:
+        print(f">>> Warning: constant fit Q value is {fit_res.Q}, the fit is not reliable")
+    
     return fit_res.p['const']
 
 def add_error_to_sample(sample_ls, jk_bs="bs"):
