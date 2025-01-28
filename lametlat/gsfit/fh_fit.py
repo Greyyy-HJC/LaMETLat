@@ -140,12 +140,12 @@ def plot_fh_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fill_tsep
         ax.set_ylim(auto_ylim([gv.mean(fh_avg), gv.mean(fit_fh)], [gv.sdev(fh_avg), gv.sdev(fit_fh)]))
         plt.tight_layout()
         
-        return ax
+        return fig, ax
         
-    ax_real = plot_part('real', fh_re_avg, fh_re_fcn)
-    ax_imag = plot_part('imag', fh_im_avg, fh_im_fcn)
+    fig_real, ax_real = plot_part('real', fh_re_avg, fh_re_fcn)
+    fig_imag, ax_imag = plot_part('imag', fh_im_avg, fh_im_fcn)
 
-    return ax_real, ax_imag
+    return fig_real, fig_imag, ax_real, ax_imag
 
 def plot_fh_2state_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fill_tsep_ls, tau_cut, id_label):
     

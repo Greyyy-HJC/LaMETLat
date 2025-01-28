@@ -90,6 +90,8 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
         
         fig, ax = default_plot()
         
+        y_data_ls = []
+        yerr_data_ls = []
         for id, tsep in enumerate(err_tsep_ls):
             tau_range = np.arange(err_tau_cut, tsep + 1 - err_tau_cut)
             err_x_ls = tau_range - tsep / 2
@@ -97,6 +99,9 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
             err_yerr_ls = gv.sdev(ra_avg[id, err_tau_cut:tsep + 1 - err_tau_cut])
             
             ax.errorbar(err_x_ls, err_y_ls, err_yerr_ls, label=r'$t_{\mathrm{sep}}$' + f' = {tsep}', color=color_ls[id], **errorb)
+            
+            y_data_ls.append(err_y_ls)
+            yerr_data_ls.append(err_yerr_ls)
 
         for id, tsep in enumerate(fill_tsep_ls):
             fit_tau = np.linspace(fill_tau_cut - 0.5, tsep - fill_tau_cut + 0.5, 100)
@@ -109,24 +114,30 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
 
             ax.fill_between(fill_x_ls, [v.mean + v.sdev for v in fit_ratio], [v.mean - v.sdev for v in fit_ratio], color=color_ls[id], alpha=0.4)
 
+            y_data_ls.append(fill_y_ls)
+            yerr_data_ls.append(fill_yerr_ls)
+
         band_x = np.arange(-6, 7)
         band_y_ls = np.ones_like(band_x) * gv.mean(ra_fit_res.p[pdf_key])
         band_yerr_ls = np.ones_like(band_x) * gv.sdev(ra_fit_res.p[pdf_key])
         ax.fill_between(band_x, band_y_ls+band_yerr_ls, band_y_ls-band_yerr_ls, color=grey, alpha=0.5, label='Fit')
         
+        y_data_ls.append(band_y_ls)
+        yerr_data_ls.append(band_yerr_ls)
+        
         ax.set_xlabel(r'$\tau - t_{\mathrm{sep}}/2$', **fs_p)
         ax.set_ylabel(r'$\mathcal{R}$', **fs_p)
-        ax.set_ylim(auto_ylim([err_y_ls, fill_y_ls, band_y_ls], [err_yerr_ls, fill_yerr_ls, band_yerr_ls]))
-        ax.legend(ncol=2, **fs_p)
+        ax.set_ylim(auto_ylim(y_data_ls, yerr_data_ls, y_range_ratio=3))
+        ax.legend(ncol=2, loc='upper right', **fs_small_p)
         ax.set_title(f'{id_label_str}{part}', **fs_p)
         plt.tight_layout()
         
-        return ax
+        return fig, ax
 
     # Plot real part
-    ax_real = plot_part('real', ra_re_avg, ra_re_fcn, 'pdf_re')
+    fig_real, ax_real = plot_part('real', ra_re_avg, ra_re_fcn, 'pdf_re')
 
     # Plot imaginary part
-    ax_imag = plot_part('imag', ra_im_avg, ra_im_fcn, 'pdf_im')
+    fig_imag, ax_imag = plot_part('imag', ra_im_avg, ra_im_fcn, 'pdf_im')
 
-    return ax_real, ax_imag 
+    return fig_real, fig_imag, ax_real, ax_imag
