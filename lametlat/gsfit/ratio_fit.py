@@ -98,7 +98,7 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
             err_y_ls = gv.mean(ra_avg[id, err_tau_cut:tsep + 1 - err_tau_cut])
             err_yerr_ls = gv.sdev(ra_avg[id, err_tau_cut:tsep + 1 - err_tau_cut])
             
-            ax.errorbar(err_x_ls, err_y_ls, err_yerr_ls, label=r'$t_{\mathrm{sep}}$' + f' = {tsep}', color=color_ls[id], **errorb)
+            ax.errorbar(err_x_ls, err_y_ls, err_yerr_ls, label=r'$t_{\mathrm{sep}}$' + f' = {tsep} a', color=color_ls[id], **errorb)
             
             y_data_ls.append(err_y_ls)
             yerr_data_ls.append(err_yerr_ls)
@@ -120,15 +120,15 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
         band_x = np.arange(-6, 7)
         band_y_ls = np.ones_like(band_x) * gv.mean(ra_fit_res.p[pdf_key])
         band_yerr_ls = np.ones_like(band_x) * gv.sdev(ra_fit_res.p[pdf_key])
-        ax.fill_between(band_x, band_y_ls+band_yerr_ls, band_y_ls-band_yerr_ls, color=grey, alpha=0.5, label='Fit')
+        ax.fill_between(band_x, band_y_ls+band_yerr_ls, band_y_ls-band_yerr_ls, color=grey, alpha=0.5, label='Fit result')
         
         y_data_ls.append(band_y_ls)
         yerr_data_ls.append(band_yerr_ls)
         
-        ax.set_xlabel(r'$\tau - t_{\mathrm{sep}}/2$', **fs_p)
+        ax.set_xlabel(r'($\tau - t_{\mathrm{sep}}/2$) / a', **fs_p)
         ax.set_ylabel(r'$\mathcal{R}$', **fs_p)
         ax.set_ylim(auto_ylim(y_data_ls, yerr_data_ls, y_range_ratio=3))
-        ax.legend(ncol=2, loc='upper right', **fs_small_p)
+        ax.legend(ncol=3, loc='upper right', **fs_small_p)
         ax.set_title(f'{id_label_str}{part}', **fs_p)
         plt.tight_layout()
         
