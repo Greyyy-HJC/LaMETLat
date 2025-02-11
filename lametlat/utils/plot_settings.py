@@ -86,6 +86,15 @@ errorb = {
     "linestyle": "none",
     "capsize": 3,
     "elinewidth": 1,
+}  # none
+
+errorb_circle = {
+    "marker": "o",
+    "markersize": 5,
+    "mfc": "none",
+    "linestyle": "none",
+    "capsize": 3,
+    "elinewidth": 1.5,
 }  # circle
 
 # Common used labels
