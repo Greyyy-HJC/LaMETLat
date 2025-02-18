@@ -88,22 +88,32 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
  
     def plot_part(part, ra_avg, ra_fcn, pdf_key):
         
+        # Combine and deduplicate tsep lists
+        all_tsep_ls = list(set(err_tsep_ls + fill_tsep_ls))
+        all_tsep_ls.sort()
+        all_tsep_array = np.array(all_tsep_ls)
+        
         fig, ax = default_plot()
         
         y_data_ls = []
         yerr_data_ls = []
         for id, tsep in enumerate(err_tsep_ls):
+            
+            id_all = np.where(all_tsep_array == tsep)[0][0]
+            
             tau_range = np.arange(err_tau_cut, tsep + 1 - err_tau_cut)
             err_x_ls = tau_range - tsep / 2
             err_y_ls = gv.mean(ra_avg[id, err_tau_cut:tsep + 1 - err_tau_cut])
             err_yerr_ls = gv.sdev(ra_avg[id, err_tau_cut:tsep + 1 - err_tau_cut])
             
-            ax.errorbar(err_x_ls, err_y_ls, err_yerr_ls, label=r'$t_{\mathrm{sep}}$' + f' = {tsep} a', color=color_ls[id], **errorb)
+            ax.errorbar(err_x_ls, err_y_ls, err_yerr_ls, label=r'$t_{\mathrm{sep}}$' + f' = {tsep} a', color=color_ls[id_all], **errorb)
             
             y_data_ls.append(err_y_ls)
             yerr_data_ls.append(err_yerr_ls)
 
         for id, tsep in enumerate(fill_tsep_ls):
+            id_all = np.where(all_tsep_array == tsep)[0][0]
+            
             fit_tau = np.linspace(fill_tau_cut - 0.5, tsep - fill_tau_cut + 0.5, 100)
             fit_t = np.ones_like(fit_tau) * tsep
             fit_ratio = ra_fcn(fit_t, fit_tau, ra_fit_res.p, Lt)
@@ -112,7 +122,7 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
             fill_y_ls = gv.mean(fit_ratio)
             fill_yerr_ls = gv.sdev(fit_ratio)
 
-            ax.fill_between(fill_x_ls, [v.mean + v.sdev for v in fit_ratio], [v.mean - v.sdev for v in fit_ratio], color=color_ls[id], alpha=0.4)
+            ax.fill_between(fill_x_ls, [v.mean + v.sdev for v in fit_ratio], [v.mean - v.sdev for v in fit_ratio], color=color_ls[id_all], alpha=0.4)
 
             y_data_ls.append(fill_y_ls)
             yerr_data_ls.append(fill_yerr_ls)
@@ -120,7 +130,7 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
         band_x = np.arange(-6, 7)
         band_y_ls = np.ones_like(band_x) * gv.mean(ra_fit_res.p[pdf_key])
         band_yerr_ls = np.ones_like(band_x) * gv.sdev(ra_fit_res.p[pdf_key])
-        ax.fill_between(band_x, band_y_ls+band_yerr_ls, band_y_ls-band_yerr_ls, color=grey, alpha=0.5, label='Fit result')
+        ax.fill_between(band_x, band_y_ls+band_yerr_ls, band_y_ls-band_yerr_ls, color=grey, alpha=0.5, label='Ratio Fit')
         
         y_data_ls.append(band_y_ls)
         yerr_data_ls.append(band_yerr_ls)

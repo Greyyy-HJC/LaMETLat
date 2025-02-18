@@ -586,7 +586,7 @@ def extrapolate_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=20
 
 
 
-def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapolated_re_gv, extrapolated_im_gv, fit_idx_range, title, xlim=[-1, 25], save_path=None):      
+def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapolated_re_gv, extrapolated_im_gv, fit_idx_range, title, xlim=[-1, 25], ylabel_re=None, ylabel_im=None, save_path=None):      
     """Make a comparison plot of the coordinate distribution in lambda dependence before and after extrapolation, default not save.
 
     Args:
@@ -653,6 +653,8 @@ def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapo
     ax.tick_params(direction="in", top="on", right="on", **ls_p)
     ax.grid(linestyle=":")
     ax.set_xlabel(lambda_label, **fs_p)
+    if ylabel_re is not None:
+        ax.set_ylabel(ylabel_re, **fs_p)
     ax.set_ylim(
         auto_ylim(
             [gv.mean(re_gv), gv.mean(extrapolated_re_gv)],
@@ -687,6 +689,8 @@ def bf_aft_extrapolation_plot(lam_ls, re_gv, im_gv, extrapolated_lam_ls, extrapo
     ax.tick_params(direction="in", top="on", right="on", **ls_p)
     ax.grid(linestyle=":")
     ax.set_xlabel(lambda_label, **fs_p)
+    if ylabel_im is not None:
+        ax.set_ylabel(ylabel_im, **fs_p)
     ax.set_ylim(
         auto_ylim(
             [gv.mean(im_gv), gv.mean(extrapolated_im_gv)],
