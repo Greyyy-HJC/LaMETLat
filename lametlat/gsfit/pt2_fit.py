@@ -1,6 +1,7 @@
 # %%
 import logging
 my_logger = logging.getLogger("my_logger")
+
 import numpy as np
 import gvar as gv
 import lsqfit as lsf
