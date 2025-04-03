@@ -3,7 +3,6 @@ Functions used to read from the raw data and return numpy array / gvar list of 2
 '''
 
 import numpy as np
-from scipy.optimize import fsolve
 
 def calculate_meff(N_T, C_t_values, boundary="periodic"):
     """
@@ -38,6 +37,7 @@ def calculate_meff(N_T, C_t_values, boundary="periodic"):
         initial_guess = 1.0
 
         # Solve the equation using fsolve
+        from scipy.optimize import fsolve
         meff, = fsolve(meff_equation, initial_guess, args=(nt, C_nt, C_nt_plus_1, N_T))
 
         # Store the solution in the meff_values list

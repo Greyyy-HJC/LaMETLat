@@ -1,4 +1,6 @@
-from lametlat.utils.log import logging
+import logging
+my_logger = logging.getLogger("my_logger")
+
 import numpy as np
 import lsqfit as lsf
 import gvar as gv
@@ -69,11 +71,11 @@ def ra_two_state_fit(
 
     # Check the quality of the fit
     if ra_fit_res.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad ratio fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {ra_fit_res.Q:.3f}, Chi2/dof = {ra_fit_res.chi2/ra_fit_res.dof:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good ratio fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {ra_fit_res.Q:.3f}, Chi2/dof = {ra_fit_res.chi2/ra_fit_res.dof:.3f}"
         )
 

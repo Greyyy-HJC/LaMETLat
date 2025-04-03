@@ -3,7 +3,6 @@ import h5py as h5
 import numpy as np
 import gvar as gv
 import lsqfit as lsf
-from scipy import interpolate
 
 from lametlat.utils.resampling import gv_ls_to_samples_corr, bs_ls_avg, jk_ls_avg
 
@@ -83,6 +82,7 @@ def gv_ls_interpolate(x_ls, gv_ls, x_ls_new, N_samp=100, method="cubic"):
 
     y_new_samp = []
     for n in range(N_samp):
+        from scipy import interpolate
         interp_func = interpolate.interp1d(x_array, y_ls_samp[n], kind=method)
         y_new = interp_func(x_ls_new)
         y_new_samp.append(y_new)

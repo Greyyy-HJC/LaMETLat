@@ -85,8 +85,8 @@ def disp_relation_plot(a, Ls, mom_ls, meff_ls, m0=None, input_priors=None):
     # Set plot properties
     ax.tick_params(direction="in", top="on", right="on", **ls_p)
     ax.grid(linestyle=":")
-    ax.set_xlabel(r"$P$ / GeV", **fs_p)
-    ax.set_ylabel(r"$E$ / GeV", **fs_p)
+    ax.set_xlabel(r"$P$ [GeV]", **fs_p)
+    ax.set_ylabel(r"$E$ [GeV]", **fs_p)
     ax.set_ylim(auto_ylim([gv.mean(fit_y)], [gv.sdev(fit_y)]))
     ax.text(0.7*(p_array[-1] - p_array[0]) + p_array[0], 0.1*(ax.get_ylim()[1] - ax.get_ylim()[0]) + ax.get_ylim()[0], r"$c_2$: {:.3f}".format(fit_res.p['c2']), **fs_p)
     ax.text(0.7*(p_array[-1] - p_array[0]) + p_array[0], 0.2*(ax.get_ylim()[1] - ax.get_ylim()[0]) + ax.get_ylim()[0], r"$c_1$: {:.3f}".format(fit_res.p['c1']), **fs_p)

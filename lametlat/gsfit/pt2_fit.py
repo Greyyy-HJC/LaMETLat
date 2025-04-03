@@ -1,5 +1,6 @@
 # %%
 import logging
+my_logger = logging.getLogger("my_logger")
 import numpy as np
 import gvar as gv
 import lsqfit as lsf
@@ -47,9 +48,9 @@ def pt2_two_state_fit(pt2_avg, tmin, tmax, Lt, normalize=True, label=None):
     )
 
     if fit_res.Q < 0.05:
-        logging.warning(f">>> Bad 2pt {label} fit with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
+        my_logger.warning(f">>> Bad 2pt {label} fit with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
     else:
-        logging.info(f">>> Good 2pt {label} fit with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
+        my_logger.info(f">>> Good 2pt {label} fit with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
 
     return fit_res
 

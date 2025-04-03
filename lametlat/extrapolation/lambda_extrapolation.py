@@ -6,6 +6,8 @@ Only fit the z > 0 part, and then mirror the z < 0 part with symmetry.
 
 # %%
 import logging
+my_logger = logging.getLogger("my_logger")
+
 import lsqfit as lsf
 from lametlat.utils.plot_settings import *
 from lametlat.extrapolation.fit_funcs import *
@@ -115,11 +117,11 @@ def extrapolate_Regge(
     )
 
     if fit_result.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad extrapolation fit with Q = {fit_result.Q:.3f}, Chi2/dof = {fit_result.chi2/fit_result.dof:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good extrapolation fit with Q = {fit_result.Q:.3f}, Chi2/dof = {fit_result.chi2/fit_result.dof:.3f}"
         )
 
@@ -192,20 +194,20 @@ def extrapolate_exp(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200
     )
 
     if fit_result_re.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
 
     if fit_result_im.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
 
@@ -302,20 +304,20 @@ def extrapolate_exp_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_lengt
     )
 
     if fit_result_re.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
 
     if fit_result_im.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
 
@@ -412,20 +414,20 @@ def extrapolate_exp_sin(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length
     )
 
     if fit_result_re.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
 
     if fit_result_im.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
 
@@ -523,20 +525,20 @@ def extrapolate_poly(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=20
     )
 
     if fit_result_re.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
         )
 
     if fit_result_im.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
         )
 
@@ -712,6 +714,9 @@ if __name__ == "__main__":
     import numpy as np
     import gvar as gv
     import matplotlib.pyplot as plt
+    
+    from lametlat.utils.log import set_my_logger
+    set_my_logger("lambda_extrapolation.log")
 
     # Example lambda values
     lam_ls = np.linspace(0, 10, 30)

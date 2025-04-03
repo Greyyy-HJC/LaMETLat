@@ -1,5 +1,7 @@
 # %%
 import logging
+my_logger = logging.getLogger("my_logger")
+
 import numpy as np
 import gvar as gv
 import lsqfit as lsf
@@ -48,9 +50,9 @@ def da_two_state_fit(da_re_avg, da_im_avg, tmin, tmax, Lt, id_label, pt2_fit_res
     )
 
     if fit_res.Q < 0.05:
-        logging.warning(f">>> Bad DA fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
+        my_logger.warning(f">>> Bad DA fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
     else:
-        logging.info(f">>> Good DA fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
+        my_logger.info(f">>> Good DA fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
 
     return fit_res
 

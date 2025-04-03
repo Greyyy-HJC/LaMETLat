@@ -1,5 +1,7 @@
 # %%
 import logging
+my_logger = logging.getLogger("my_logger")
+
 import numpy as np
 import lsqfit as lsf
 import gvar as gv
@@ -51,11 +53,11 @@ def fh_one_state_fit(fh_re_avg, fh_im_avg, tsep_ls, id_label):
     )
 
     if fh_fit_res.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad fh fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fh_fit_res.Q:.3f}, Chi2/dof = {fh_fit_res.chi2/fh_fit_res.dof:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good fh fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fh_fit_res.Q:.3f}, Chi2/dof = {fh_fit_res.chi2/fh_fit_res.dof:.3f}"
         )
 
@@ -105,11 +107,11 @@ def fh_two_state_fit(fh_re_avg, fh_im_avg, tsep_ls, tau_cut, id_label, pt2_fit_r
     )
 
     if fh_fit_res.Q < 0.05:
-        logging.warning(
+        my_logger.warning(
             f">>> Bad fh two state fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fh_fit_res.Q:.3f}, Chi2/dof = {fh_fit_res.chi2/fh_fit_res.dof:.3f}"
         )
     else:
-        logging.info(
+        my_logger.info(
             f">>> Good fh two state fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fh_fit_res.Q:.3f}, Chi2/dof = {fh_fit_res.chi2/fh_fit_res.dof:.3f}"
         )
 
