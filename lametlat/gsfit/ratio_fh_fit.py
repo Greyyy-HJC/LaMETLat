@@ -6,15 +6,15 @@ import lsqfit as lsf
 import gvar as gv
 
 from lametlat.gsfit.prior_setting import two_state_fit
-from lametlat.gsfit.fit_funcs import ra_re_fcn, ra_im_fcn
+from lametlat.gsfit.fit_funcs import ra_re_fcn, ra_im_fcn, fh_re_fcn, fh_im_fcn
 from lametlat.utils.plot_settings import *
 
 
-def ra_two_state_fit(
-    ra_re_avg_dic, ra_im_avg_dic, tsep_ls, tau_cut, Lt, id_label, pt2_fit_res=None
+def ra_two_state_fh_one_state_fit(
+    ra_re_avg_dic, ra_im_avg_dic, fh_re_avg, fh_im_avg, tsep_ls, tau_cut, Lt, id_label, pt2_fit_res=None
 ):
     """
-    Perform a ratio fit with two states.
+    Perform a joint fit with two states for ratio and one state for fh.
 
     Args:
         ra_re_avg_dic (dict of gvar list): Dictionary containing the real part of the ratio average, keys are tsep.
@@ -46,43 +46,51 @@ def ra_two_state_fit(
     b = id_label["b"]
     z = id_label["z"]
 
-    def ra_fcn(x, p):
-        ra_t, ra_tau = x
+    def joint_fcn(x, p):
+        ra_t, ra_tau, fh_t = x
         return {
-            "re": ra_re_fcn(ra_t, ra_tau, p, Lt),
-            "im": ra_im_fcn(ra_t, ra_tau, p, Lt),
+            "ratio_re": ra_re_fcn(ra_t, ra_tau, p, Lt),
+            "ratio_im": ra_im_fcn(ra_t, ra_tau, p, Lt),
+            "fh_re": fh_re_fcn(fh_t, p),
+            "fh_im": fh_im_fcn(fh_t, p),
         }
 
     # Prepare data for fit
-    temp_t, temp_tau, ra_fit_re, ra_fit_im = [], [], [], []
+    temp_t, temp_tau, temp_fh_t, ra_fit_re, ra_fit_im = [], [], [], [], []
     for tsep in tsep_ls:
         for tau in range(tau_cut, tsep + 1 - tau_cut):
             temp_t.append(tsep)
             temp_tau.append(tau)
             ra_fit_re.append(ra_re_avg_dic[f"tsep_{tsep}"][tau])
             ra_fit_im.append(ra_im_avg_dic[f"tsep_{tsep}"][tau])
+            
+        temp_fh_t.append(tsep)
+
+    fh_fit_re = fh_re_avg
+    fh_fit_im = fh_im_avg
 
     # Perform the fit
-    tsep_tau_ls = [np.array(temp_t), np.array(temp_tau)]
-    ra_fit = {"re": ra_fit_re, "im": ra_fit_im}
-    ra_fit_res = lsf.nonlinear_fit(
-        data=(tsep_tau_ls, ra_fit), prior=priors, fcn=ra_fcn, maxit=10000
+    tsep_tau_ls = [np.array(temp_t), np.array(temp_tau), np.array(temp_fh_t)[:-1]] # * Note here because we are fitting FH = sum(t + 1) - sum(t)
+    ra_fit = {"ratio_re": ra_fit_re, "ratio_im": ra_fit_im, "fh_re": fh_fit_re, "fh_im": fh_fit_im}
+    
+    joint_fit_res = lsf.nonlinear_fit(
+        data=(tsep_tau_ls, ra_fit), prior=priors, fcn=joint_fcn, maxit=10000
     )
 
     # Check the quality of the fit
-    if ra_fit_res.Q < 0.05:
+    if joint_fit_res.Q < 0.05:
         my_logger.warning(
-            f">>> Bad ratio fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {ra_fit_res.Q:.3f}, Chi2/dof = {ra_fit_res.chi2/ra_fit_res.dof:.3f}"
+            f">>> Bad ratio + fh fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {joint_fit_res.Q:.3f}, Chi2/dof = {joint_fit_res.chi2/joint_fit_res.dof:.3f}"
         )
     else:
         my_logger.info(
-            f">>> Good ratio fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {ra_fit_res.Q:.3f}, Chi2/dof = {ra_fit_res.chi2/ra_fit_res.dof:.3f}"
+            f">>> Good ratio + fh fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {joint_fit_res.Q:.3f}, Chi2/dof = {joint_fit_res.chi2/joint_fit_res.dof:.3f}"
         )
 
-    return ra_fit_res
+    return joint_fit_res
 
 
-def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep_ls, Lt, id_label, err_tau_cut=1, fill_tau_cut=1):
+def plot_ra_fh_fit_on_data(ra_re_avg, ra_im_avg, joint_fit_res, err_tsep_ls, fill_tsep_ls, Lt, id_label, err_tau_cut=1, fill_tau_cut=1):
 
     id_label_str = ""
     for key in id_label:
@@ -118,7 +126,7 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
             
             fit_tau = np.linspace(fill_tau_cut - 0.5, tsep - fill_tau_cut + 0.5, 100)
             fit_t = np.ones_like(fit_tau) * tsep
-            fit_ratio = ra_fcn(fit_t, fit_tau, ra_fit_res.p, Lt)
+            fit_ratio = ra_fcn(fit_t, fit_tau, joint_fit_res.p, Lt)
 
             fill_x_ls = fit_tau - tsep / 2
             fill_y_ls = gv.mean(fit_ratio)
@@ -130,9 +138,9 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
             yerr_data_ls.append(fill_yerr_ls)
 
         band_x = np.arange(-6, 7)
-        band_y_ls = np.ones_like(band_x) * gv.mean(ra_fit_res.p[pdf_key])
-        band_yerr_ls = np.ones_like(band_x) * gv.sdev(ra_fit_res.p[pdf_key])
-        ax.fill_between(band_x, band_y_ls+band_yerr_ls, band_y_ls-band_yerr_ls, color=grey, alpha=0.5, label='Ratio Fit')
+        band_y_ls = np.ones_like(band_x) * gv.mean(joint_fit_res.p[pdf_key])
+        band_yerr_ls = np.ones_like(band_x) * gv.sdev(joint_fit_res.p[pdf_key])
+        ax.fill_between(band_x, band_y_ls+band_yerr_ls, band_y_ls-band_yerr_ls, color=grey, alpha=0.5, label='Ratio + FH Fit')
         
         y_data_ls.append(band_y_ls)
         yerr_data_ls.append(band_yerr_ls)
