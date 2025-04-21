@@ -1,6 +1,6 @@
 # LaMETLat
 
-Python package for lattice calculations in Large Momentum Effective Theory (LaMET)
+Python package for lattice calculations in Large Momentum Effective Theory (LaMET). This package provides tools for lattice QCD data analysis, focusing on LaMET applications.
 
 ## Philosophy
 
@@ -13,25 +13,54 @@ Python package for lattice calculations in Large Momentum Effective Theory (LaME
 
 ## Features
 
-// ... Add key features of the package ...
+- Preprocessing of lattice QCD data
+- Fitting tools for Ground State Extraction (GSE)
+- Extrapolation methods for lattice data
+- Renormalization techniques for LaMET
+- Utilities for data manipulation and analysis
+- Bootstrap resampling for statistical error estimation
 
 ## Installation
 
-```
+```bash
+# Clone the repository
+git clone https://github.com/heji-the/LaMETLat.git
+cd LaMETLat
+
+# Install dependencies and the package
 bash init.sh
 ```
 
 ## Usage
 
-Check out examples in `examples/`.
+Check out examples in the `examples/` directory, which includes:
+- `bootstrap.ipynb`: Bootstrap resampling methods
+- `lanczos.ipynb`: Lanczos algorithm implementation
+- `pdf_self_renorm.ipynb`: Self-renormalization techniques for PDFs
 
-```
+Basic usage:
+```python
 import lametlat as lml
+
+# Use the preprocessing tools
+# Example usage will depend on your specific needs
 ```
 
-## Documentation
+## Package Structure
 
-// ... Add link to documentation or instructions on how to access it ...
+- `lametlat/preprocess/`: Data preprocessing tools
+- `lametlat/gsfit/`: Ground state fitting algorithms
+- `lametlat/extrapolation/`: Extrapolation methods
+- `lametlat/renormalization/`: Renormalization techniques
+- `lametlat/utils/`: Utility functions
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
