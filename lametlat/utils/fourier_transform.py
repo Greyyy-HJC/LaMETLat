@@ -98,6 +98,59 @@ def sum_inv_ft_re_im(k_ls, fk_re_ls, fk_im_ls, delta_k, output_x):
 
     return val_re, val_im
 
+# * From bT to kT space
+def two_dim_ft(bT_gev, kT, f_bdep):
+    """Two dimensional Fourier transform from bT to kT space.
+    
+    Args:
+        bT_gev (float): bT value in GeV^-1
+        kT (float): kT value in GeV
+        f_bdep (function): Function that takes bT as input and returns f(bT)
+        
+    Returns:
+        float: f(kT) value
+    """
+    from scipy.special import j0
+    
+    # Convert input lists to numpy arrays
+    bT_gev = np.array(bT_gev)
+    f_bdep = np.array(f_bdep)
+    j0_kTbT = j0( kT * bT_gev )
+    
+    # Calculate the Fourier transform
+    delta_bT = abs(bT_gev[1] - bT_gev[0])
+    
+    # Calculate the Fourier transform
+    result = delta_bT / (2 * np.pi) * np.sum( bT_gev * f_bdep * j0_kTbT )
+    
+    return result
+
+def two_dim_inv_ft(kT_gev, bT, f_kdep):
+    """Two dimensional inverse Fourier transform from kT to bT space.
+    
+    Args:
+        kT_gev (float): kT value in GeV
+        bT (float): bT value in GeV^-1
+        f_kdep (function): Function that takes kT as input and returns f(kT)
+        
+    Returns:
+        float: f(kT) value
+    """
+    from scipy.special import j0
+    
+    # Convert input lists to numpy arrays
+    kT_gev = np.array(kT_gev)
+    f_kdep = np.array(f_kdep)
+    j0_kTbT = j0( kT_gev * bT )
+    
+    # Calculate the Fourier transform
+    delta_kT = abs(kT_gev[1] - kT_gev[0])
+    
+    # Calculate the Fourier transform
+    result = delta_kT * (2 * np.pi) * np.sum( kT_gev * f_kdep * j0_kTbT )
+    
+    return result
+
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
