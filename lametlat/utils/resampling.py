@@ -103,6 +103,7 @@ def jk_ls_avg(jk_ls, axis=0):
     # If axis is not 0, swap axes to make the jackknife samples on axis 0
     if axis != 0:
         jk_ls = np.swapaxes(jk_ls, 0, axis)
+        
     shape = np.shape(jk_ls)
     jk_ls = np.reshape(jk_ls, (shape[0], -1))
 
