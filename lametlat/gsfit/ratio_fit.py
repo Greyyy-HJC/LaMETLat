@@ -138,7 +138,7 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
         yerr_data_ls.append(band_yerr_ls)
         
         ax.set_xlabel(r'($\tau - t_{\mathrm{sep}}/2$) / a', **fs_p)
-        ax.set_ylabel(r'$\mathcal{R} (t_{\mathrm{sep}}, \tau)$', **fs_p)
+        ax.set_ylabel(r'$R (t_{\mathrm{sep}}, \tau)$', **fs_p)
         ax.set_ylim(auto_ylim(y_data_ls, yerr_data_ls, y_range_ratio=2))
         ax.legend(ncol=3, loc='upper right', **fs_small_p)
         ax.set_title(f'{id_label_str}{part}', **fs_p)
