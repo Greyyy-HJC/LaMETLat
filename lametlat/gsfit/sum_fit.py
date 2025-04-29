@@ -6,8 +6,8 @@ import numpy as np
 import lsqfit as lsf
 import gvar as gv
 
-from lametlat.gsfit.fit_funcs import sum_re_fcn, sum_im_fcn, sum_re_2state_fcn, sum_im_2state_fcn
-from lametlat.gsfit.prior_setting import summation_fit
+from lametlat.gsfit.fit_funcs import sum_re_1state_fcn, sum_im_1state_fcn, sum_re_2state_fcn, sum_im_2state_fcn
+from lametlat.gsfit.prior_setting import two_state_fit
 from lametlat.utils.plot_settings import *
 
 
@@ -29,7 +29,7 @@ def sum_one_state_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label):
         None
 
     """
-    priors = summation_fit()
+    priors = two_state_fit()
 
     px = id_label["px"]
     py = id_label["py"]
@@ -40,8 +40,8 @@ def sum_one_state_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label):
     # * fit function
     def fcn(x, p):
         t = x["re"]
-        re = sum_re_fcn(t, tau_cut, p)
-        im = sum_im_fcn(t, tau_cut, p)
+        re = sum_re_1state_fcn(t, tau_cut, p)
+        im = sum_im_1state_fcn(t, tau_cut, p)
         val = {"re": re, "im": im}
         return val
 
@@ -81,7 +81,7 @@ def sum_two_state_fit(sum_re_avg, sum_im_avg, tsep_ls, tau_cut, id_label, pt2_fi
         None
 
     """
-    priors = summation_fit()
+    priors = two_state_fit()
     # Set 2pt fit results as priors
     if pt2_fit_res is not None:
         priors.update( {key: pt2_fit_res.p[key] for key in ["log(dE1)"]} )
@@ -144,7 +144,7 @@ def plot_sum_fit_on_data(sum_re_avg, sum_im_avg, sum_fit_res, err_tsep_ls, fill_
         
         return ax
         
-    ax_real = plot_part('real', sum_re_avg, sum_re_fcn)
-    ax_imag = plot_part('imag', sum_im_avg, sum_im_fcn)
+    ax_real = plot_part('real', sum_re_avg, sum_re_1state_fcn)
+    ax_imag = plot_part('imag', sum_im_avg, sum_im_1state_fcn)
 
     return ax_real, ax_imag

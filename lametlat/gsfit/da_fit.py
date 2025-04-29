@@ -16,11 +16,11 @@ def da_two_state_fit(da_re_avg, da_im_avg, tmin, tmax, Lt, id_label, pt2_fit_res
     # Set 2pt fit results as priors
     if pt2_fit_res is not None:
         priors.update(
-            {key: pt2_fit_res.p[key] for key in ["E0", "log(dE1)", "re_z0", "re_z1"]}
+            {key: pt2_fit_res.p[key] for key in ["E0", "log(dE1)", "z0", "z1"]}
         )
         
         # Make prior width 10x larger for updated parameters
-        for key in ["E0", "log(dE1)", "re_z0", "re_z1"]:
+        for key in ["E0", "log(dE1)", "z0", "z1"]:
             priors[key] = gv.gvar(gv.mean(priors[key]), 5*gv.sdev(priors[key]))
 
         
@@ -73,28 +73,92 @@ def plot_da_fit_on_ratio(pt2_avg, pt2_fit_res, da_re_avg, da_im_avg, da_fit_res,
     fit_ratio_re = fit_da_re / fit_pt2
     fit_ratio_im = fit_da_im / fit_pt2
     
-    fig, ax = default_plot()
-    ax.errorbar(err_t_ls, gv.mean(data_ratio_re), yerr=gv.sdev(data_ratio_re), label='Data', color=blue, **errorb)
-    ax.fill_between(fill_t_ls, [v.mean + v.sdev for v in fit_ratio_re], [v.mean - v.sdev for v in fit_ratio_re], color=red, alpha=0.4, label='Fit')
-    ax.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
-    ax.set_ylabel(r'$R_{\mathrm{DA}}$', **fs_p)
-    ax.legend(**fs_p)
-    ax.set_title(f'{id_label_str}R_DA_real', **fs_p)
-    ax.set_ylim(auto_ylim([gv.mean(data_ratio_re), gv.mean(fit_ratio_re)], [gv.sdev(data_ratio_re), gv.sdev(fit_ratio_re)]))
+    fig_re, ax_re = default_plot()
+    ax_re.errorbar(err_t_ls, gv.mean(data_ratio_re), yerr=gv.sdev(data_ratio_re), label='Data', color=blue, **errorb)
+    ax_re.fill_between(fill_t_ls, [v.mean + v.sdev for v in fit_ratio_re], [v.mean - v.sdev for v in fit_ratio_re], color=red, alpha=0.4, label='Fit')
+    ax_re.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
+    ax_re.set_ylabel(r'$R_{\mathrm{DA}}$', **fs_p)
+    ax_re.legend(**fs_p)
+    ax_re.set_title(f'{id_label_str}R_DA_real', **fs_p)
+    ax_re.set_ylim(auto_ylim([gv.mean(data_ratio_re), gv.mean(fit_ratio_re)], [gv.sdev(data_ratio_re), gv.sdev(fit_ratio_re)]))
     plt.tight_layout()
     plt.show()
     
-    fig, ax = default_plot()
-    ax.errorbar(err_t_ls, gv.mean(data_ratio_im), yerr=gv.sdev(data_ratio_im), label='Data', color=blue, **errorb)
-    ax.fill_between(fill_t_ls, [v.mean + v.sdev for v in fit_ratio_im], [v.mean - v.sdev for v in fit_ratio_im], color=red, alpha=0.4, label='Fit')
-    ax.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
-    ax.set_ylabel(r'$R_{\mathrm{DA}}$', **fs_p)
-    ax.legend(**fs_p)
-    ax.set_title(f'{id_label_str}R_DA_imag', **fs_p)
-    ax.set_ylim(auto_ylim([gv.mean(data_ratio_im), gv.mean(fit_ratio_im)], [gv.sdev(data_ratio_im), gv.sdev(fit_ratio_im)]))
+    fig_im, ax_im = default_plot()
+    ax_im.errorbar(err_t_ls, gv.mean(data_ratio_im), yerr=gv.sdev(data_ratio_im), label='Data', color=blue, **errorb)
+    ax_im.fill_between(fill_t_ls, [v.mean + v.sdev for v in fit_ratio_im], [v.mean - v.sdev for v in fit_ratio_im], color=red, alpha=0.4, label='Fit')
+    ax_im.set_xlabel(r'$t_{\mathrm{sep}}$', **fs_p)
+    ax_im.set_ylabel(r'$R_{\mathrm{DA}}$', **fs_p)
+    ax_im.legend(**fs_p)
+    ax_im.set_title(f'{id_label_str}R_DA_imag', **fs_p)
+    ax_im.set_ylim(auto_ylim([gv.mean(data_ratio_im), gv.mean(fit_ratio_im)], [gv.sdev(data_ratio_im), gv.sdev(fit_ratio_im)]))
     plt.tight_layout()
     plt.show()
     
-    return ax
+    return fig_re, ax_re, fig_im, ax_im
+
+# %%
+
+if __name__ == "__main__":
+    import numpy as np
+    import gvar as gv
+    from lametlat.utils.plot_settings import default_plot
+    
+    # Test data parameters
+    Lt = 64
+    tmin, tmax = 2, 18
+    t_range = np.arange(0, Lt)
+    
+    # Generate mock 2pt function data
+    E0, E1 = 0.5, 1.2
+    z0, z1 = 1.0, 1.5
+    noise_level = 0.0001
+    
+    pt2_data = z0**2 / (2 * E0) * np.exp(-E0 * t_range) + z1**2 / (2 * E1) * np.exp(-E1 * t_range)
+    pt2_data += np.random.normal(0, noise_level, Lt)
+    pt2_avg = gv.gvar(pt2_data, np.full_like(pt2_data, noise_level))
+    
+    # Generate mock DA data
+    # Using similar parameters but with different amplitudes
+    da_re_data = 0.8 * z0**2 / (2 * E0) * np.exp(-E0 * t_range) + 0.6 * z1**2 / (2 * E1) * np.exp(-E1 * t_range)
+    da_im_data = 0.3 * z0**2 / (2 * E0) * np.exp(-E0 * t_range) + 0.2 * z1**2 / (2 * E1) * np.exp(-E1 * t_range)
+    
+    da_re_data += np.random.normal(0, noise_level, Lt)
+    da_im_data += np.random.normal(0, noise_level, Lt)
+    
+    da_re_avg = gv.gvar(da_re_data, np.full_like(da_re_data, noise_level))
+    da_im_avg = gv.gvar(da_im_data, np.full_like(da_im_data, noise_level))
+    
+    # Create id_label dictionary
+    id_label = {
+        "px": 0,
+        "py": 0,
+        "pz": 0,
+        "b": 0,
+        "z": 0
+    }
+    
+    # First perform 2pt fit
+    from lametlat.gsfit.pt2_fit import pt2_two_state_fit
+    pt2_fit_res = pt2_two_state_fit(pt2_avg, tmin, tmax, Lt, normalize=False, label="test")
+    
+    # Perform DA fit
+    da_fit_res = da_two_state_fit(da_re_avg, da_im_avg, tmin, tmax, Lt, id_label, pt2_fit_res)
+    
+    print("DA Fit results:")
+    print(da_fit_res.format(maxline=True))
+    
+    # Plot the results
+    err_t_ls = np.arange(tmax)
+    fill_t_ls = np.arange(tmin, tmax)
+    
+    plot_da_fit_on_ratio(pt2_avg[err_t_ls], pt2_fit_res, da_re_avg[err_t_ls], da_im_avg[err_t_ls], da_fit_res, err_t_ls, fill_t_ls, id_label, Lt)
+    
+    # Additional checks
+    fitted_E0 = da_fit_res.p["E0"].mean
+    fitted_E1 = (da_fit_res.p["E0"] + gv.exp(da_fit_res.p["log(dE1)"])).mean
+    
+    print(f"Input E0: {E0:.4f}, Fitted E0: {fitted_E0:.4f}")
+    print(f"Input E1: {E1:.4f}, Fitted E1: {fitted_E1:.4f}")
 
 # %%

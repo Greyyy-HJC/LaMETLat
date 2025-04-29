@@ -109,7 +109,7 @@ class T_Matrix:
 if __name__ == "__main__":
     from lametlat.utils.constants import GEV_FM
     a = 0.04
-    pt2_data = np.loadtxt("../../../examples/data/c2pt.CG52bxp00_CG52bxp00.SS.meson_g15.PX0_PY0_PZ0.real_mean.txt", delimiter='\t')
+    pt2_data = np.loadtxt("../../../examples/data/c2pt_mean.txt", delimiter='\t')
     print(np.shape(pt2_data))
     
     pt2_samp = pt2_data[:,1] # take the mean value as a check

@@ -1,3 +1,4 @@
+# %%
 import logging
 my_logger = logging.getLogger("my_logger")
 
@@ -37,7 +38,7 @@ def ra_two_state_fit(
     # Set 2pt fit results as priors
     if pt2_fit_res is not None:
         priors.update(
-            {key: pt2_fit_res.p[key] for key in ["E0", "log(dE1)", "re_z0", "re_z1"]}
+            {key: pt2_fit_res.p[key] for key in ["E0", "log(dE1)", "z0", "z1"]}
         )
 
     px = id_label["px"]
@@ -88,7 +89,7 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
     for key in id_label:
         id_label_str += f"{key} = {id_label[key]}, "
  
-    def plot_part(part, ra_avg, ra_fcn, pdf_key):
+    def plot_part(part, ra_avg, ra_fcn, target_key):
         
         # Combine and deduplicate tsep lists
         all_tsep_ls = list(set(err_tsep_ls + fill_tsep_ls))
@@ -130,8 +131,11 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
             yerr_data_ls.append(fill_yerr_ls)
 
         band_x = np.arange(-6, 7)
-        band_y_ls = np.ones_like(band_x) * gv.mean(ra_fit_res.p[pdf_key])
-        band_yerr_ls = np.ones_like(band_x) * gv.sdev(ra_fit_res.p[pdf_key])
+        
+        bare_matrix_element = ra_fit_res.p[target_key] / ( 2 * ra_fit_res.p["E0"] )
+        
+        band_y_ls = np.ones_like(band_x) * gv.mean(bare_matrix_element)
+        band_yerr_ls = np.ones_like(band_x) * gv.sdev(bare_matrix_element)
         ax.fill_between(band_x, band_y_ls+band_yerr_ls, band_y_ls-band_yerr_ls, color=grey, alpha=0.5, label='Ratio Fit')
         
         y_data_ls.append(band_y_ls)
@@ -147,9 +151,10 @@ def plot_ra_fit_on_data(ra_re_avg, ra_im_avg, ra_fit_res, err_tsep_ls, fill_tsep
         return fig, ax
 
     # Plot real part
-    fig_real, ax_real = plot_part('real', ra_re_avg, ra_re_fcn, 'pdf_re')
+    fig_real, ax_real = plot_part('real', ra_re_avg, ra_re_fcn, 'O00_re')
 
     # Plot imaginary part
-    fig_imag, ax_imag = plot_part('imag', ra_im_avg, ra_im_fcn, 'pdf_im')
+    fig_imag, ax_imag = plot_part('imag', ra_im_avg, ra_im_fcn, 'O00_im')
 
     return fig_real, fig_imag, ax_real, ax_imag
+

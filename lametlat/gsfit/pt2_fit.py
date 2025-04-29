@@ -57,6 +57,15 @@ def pt2_two_state_fit(pt2_avg, tmin, tmax, Lt, normalize=True, label=None):
 
 
 def plot_2pt_fit_on_meff(pt2_avg, pt2_fit_res, err_t_ls, fill_t_ls, id_label, Lt):
+    """
+    Plot the 2pt fit on meff.
+    
+    Args:
+        pt2_avg (gvar list): The averaged 2-point data, same shape as err_t_ls.
+        pt2_fit_res (FitResult): The result of the fit.
+        err_t_ls (list): The error time list.
+        fill_t_ls (list): The fill time list.
+    """
     
     from lametlat.preprocess.read_raw import pt2_to_meff
     
@@ -81,7 +90,7 @@ def plot_2pt_fit_on_meff(pt2_avg, pt2_fit_res, err_t_ls, fill_t_ls, id_label, Lt
     plt.tight_layout()
     plt.show()
     
-    return ax
+    return fig, ax
     
 if __name__ == "__main__":
     import numpy as np
@@ -96,10 +105,10 @@ if __name__ == "__main__":
     
     # Generate mock 2pt function data
     E0, E1 = 0.5, 1.2
-    z0, z1 = 0.8, 0.3
-    noise_level = 0.01
+    z0, z1 = 1.0, 1.5
+    noise_level = 0.0001
     
-    pt2_data = z0**2 * np.exp(-E0 * t_range) + z1**2 * np.exp(-E1 * t_range)
+    pt2_data = z0**2 / (2 * E0) * np.exp(-E0 * t_range) + z1**2 / (2 * E1) * np.exp(-E1 * t_range)
     pt2_data += np.random.normal(0, noise_level, Lt)
     pt2_avg = gv.gvar(pt2_data, np.full_like(pt2_data, noise_level))
     

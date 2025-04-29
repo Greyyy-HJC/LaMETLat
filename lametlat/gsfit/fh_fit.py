@@ -6,8 +6,8 @@ import numpy as np
 import lsqfit as lsf
 import gvar as gv
 
-from lametlat.gsfit.fit_funcs import fh_re_fcn, fh_im_fcn, fh_re_2state_fcn, fh_im_2state_fcn
-from lametlat.gsfit.prior_setting import fh_fit
+from lametlat.gsfit.fit_funcs import fh_re_1state_fcn, fh_im_1state_fcn, fh_re_2state_fcn, fh_im_2state_fcn
+from lametlat.gsfit.prior_setting import two_state_fit
 from lametlat.utils.plot_settings import *
 
 
@@ -28,7 +28,7 @@ def fh_one_state_fit(fh_re_avg, fh_im_avg, tsep_ls, id_label):
         None
 
     """
-    priors = fh_fit()
+    priors = two_state_fit()
 
     px = id_label["px"]
     py = id_label["py"]
@@ -38,8 +38,8 @@ def fh_one_state_fit(fh_re_avg, fh_im_avg, tsep_ls, id_label):
 
     # * fit function
     def fcn(x, p):
-        re = fh_re_fcn(x["re"], p)
-        im = fh_im_fcn(x["im"], p)
+        re = fh_re_1state_fcn(x["re"], p)
+        im = fh_im_1state_fcn(x["im"], p)
         val = {"re": re, "im": im}
         return val
 
@@ -78,7 +78,7 @@ def fh_two_state_fit(fh_re_avg, fh_im_avg, tsep_ls, tau_cut, id_label, pt2_fit_r
         None
 
     """
-    priors = fh_fit()
+    priors = two_state_fit()
     # Set 2pt fit results as priors
     if pt2_fit_res is not None:
         priors.update( {key: pt2_fit_res.p[key] for key in ["log(dE1)"]} )
@@ -141,8 +141,8 @@ def plot_fh_fit_on_data(fh_re_avg, fh_im_avg, fh_fit_res, err_tsep_ls, fill_tsep
         
         return fig, ax
         
-    fig_real, ax_real = plot_part('real', fh_re_avg, fh_re_fcn)
-    fig_imag, ax_imag = plot_part('imag', fh_im_avg, fh_im_fcn)
+    fig_real, ax_real = plot_part('real', fh_re_avg, fh_re_1state_fcn)
+    fig_imag, ax_imag = plot_part('imag', fh_im_avg, fh_im_1state_fcn)
 
     return fig_real, fig_imag, ax_real, ax_imag
 
