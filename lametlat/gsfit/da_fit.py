@@ -57,6 +57,45 @@ def da_two_state_fit(da_re_avg, da_im_avg, tmin, tmax, Lt, id_label, pt2_fit_res
     return fit_res
 
 
+def da_two_state_joint_fit(pt2_avg, da_re_avg, da_im_avg, pt2_trange, da_trange, Lt, id_label, p0=None):
+    priors = two_state_fit()
+    
+    px = id_label["px"]
+    py = id_label["py"]
+    pz = id_label["pz"]
+    b = id_label["b"]
+    z = id_label["z"]
+
+    def da_fcn(x, p):
+        pt2_t = x[0]
+        da_t = x[1]
+        return {
+            "pt2": pt2_re_fcn(pt2_t, p, Lt),
+            "re": da_re_fcn(da_t, p, Lt),
+            "im": da_im_fcn(da_t, p, Lt),
+        }
+
+    # Compute the range only once, outside of the loop
+    fit_pt2 = pt2_avg[pt2_trange]
+    fit_da_re = da_re_avg[da_trange]
+    fit_da_im = da_im_avg[da_trange]
+    
+    data_x = [pt2_trange, da_trange]
+    fit_data = {"pt2": fit_pt2, "re": fit_da_re, "im": fit_da_im}
+
+    fit_res = lsf.nonlinear_fit(
+        data=(data_x, fit_data), prior=priors, fcn=da_fcn, maxit=10000,
+        svdcut=1e-6, p0=p0,
+    )
+
+    if fit_res.Q < 0.05:
+        my_logger.warning(f"\n>>> Bad DA joint fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
+    else:
+        my_logger.info(f"\n>>> Good DA joint fit for PX = {px}, PY = {py}, PZ = {pz}, z = {z}, b = {b} with Q = {fit_res.Q:.3f}, Chi2/dof = {fit_res.chi2/fit_res.dof:.3f}")
+
+    return fit_res
+
+
 def plot_da_fit_on_ratio(pt2_avg, pt2_fit_res, da_re_avg, da_im_avg, da_fit_res, err_t_ls, fill_t_ls, id_label, Lt):
 
     id_label_str = ""
@@ -95,7 +134,7 @@ def plot_da_fit_on_ratio(pt2_avg, pt2_fit_res, da_re_avg, da_im_avg, da_fit_res,
     plt.tight_layout()
     plt.show()
     
-    return fig_re, ax_re, fig_im, ax_im
+    return fig_re, fig_im, ax_re, ax_im
 
 # %%
 
@@ -145,19 +184,35 @@ if __name__ == "__main__":
     # Perform DA fit
     da_fit_res = da_two_state_fit(da_re_avg, da_im_avg, tmin, tmax, Lt, id_label, pt2_fit_res)
     
-    print("DA Fit results:")
+    # Or just do the joint fit
+    pt2_trange = np.arange(tmin, tmax)
+    da_trange = np.arange(tmin, tmax)
+    joint_fit_res = da_two_state_joint_fit(pt2_avg, da_re_avg, da_im_avg, pt2_trange, da_trange, Lt, id_label)
+    
+    print("Chained DA Fit results:")
     print(da_fit_res.format(maxline=True))
+    
+    print("Joint DA Fit results:")
+    print(joint_fit_res.format(maxline=True))
     
     # Plot the results
     err_t_ls = np.arange(tmax)
     fill_t_ls = np.arange(tmin, tmax)
     
-    plot_da_fit_on_ratio(pt2_avg[err_t_ls], pt2_fit_res, da_re_avg[err_t_ls], da_im_avg[err_t_ls], da_fit_res, err_t_ls, fill_t_ls, id_label, Lt)
+    _ , _ , _ , _ = plot_da_fit_on_ratio(pt2_avg[err_t_ls], pt2_fit_res, da_re_avg[err_t_ls], da_im_avg[err_t_ls], da_fit_res, err_t_ls, fill_t_ls, id_label, Lt)
+    
+    _ , _ , _ , _ = plot_da_fit_on_ratio(pt2_avg[err_t_ls], joint_fit_res, da_re_avg[err_t_ls], da_im_avg[err_t_ls], joint_fit_res, err_t_ls, fill_t_ls, id_label, Lt)
     
     # Additional checks
     fitted_E0 = da_fit_res.p["E0"].mean
     fitted_E1 = (da_fit_res.p["E0"] + gv.exp(da_fit_res.p["log(dE1)"])).mean
+    print(">>> Chained DA fit: ")
+    print(f"Input E0: {E0:.4f}, Fitted E0: {fitted_E0:.4f}")
+    print(f"Input E1: {E1:.4f}, Fitted E1: {fitted_E1:.4f}")
     
+    fitted_E0 = joint_fit_res.p["E0"].mean
+    fitted_E1 = (joint_fit_res.p["E0"] + gv.exp(joint_fit_res.p["log(dE1)"])).mean
+    print(">>> Joint DA fit: ")
     print(f"Input E0: {E0:.4f}, Fitted E0: {fitted_E0:.4f}")
     print(f"Input E1: {E1:.4f}, Fitted E1: {fitted_E1:.4f}")
 
