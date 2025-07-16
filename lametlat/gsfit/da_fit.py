@@ -10,7 +10,7 @@ from lametlat.gsfit.prior_setting import two_state_fit
 from lametlat.utils.plot_settings import *
 
 
-def da_two_state_fit(da_re_avg, da_im_avg, tmin, tmax, Lt, id_label, pt2_fit_res=None):
+def da_two_state_fit(da_re_avg, da_im_avg, tmin, tmax, Lt, id_label, pt2_fit_res=None, p0=None):
 
     priors = two_state_fit()
     # Set 2pt fit results as priors
@@ -46,7 +46,7 @@ def da_two_state_fit(da_re_avg, da_im_avg, tmin, tmax, Lt, id_label, pt2_fit_res
     fit_data = {"re": fit_da_re, "im": fit_da_im}
 
     fit_res = lsf.nonlinear_fit(
-        data=(t_range, fit_data), prior=priors, fcn=da_fcn, maxit=10000
+        data=(t_range, fit_data), prior=priors, fcn=da_fcn, maxit=10000, p0=p0
     )
 
     if fit_res.Q < 0.05:
