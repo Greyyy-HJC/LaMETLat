@@ -22,14 +22,14 @@ def gamma_gvar_right(x):
         deriv = (sp.gamma(gv.mean(x) + dx) - sp.gamma(gv.mean(x) - dx)) / (2*dx)
         return val + deriv * (x - gv.mean(x))
 
-# 拟合函数
+# fitting function
 def fcn_wrong(x, p):
     return {'y': gamma_gvar_wrong(p['a']) * x['x']}
 
 def fcn_right(x, p):
     return {'y': gamma_gvar_right(p['a']) * x['x']}
 
-# 拟合数据
+# fitting data
 xdata = {'x': np.array([2.0, 3.0, 4.0])}
 ydata = {'y': np.array([gv.gvar(2.0, 0.1), gv.gvar(3.0, 0.1), gv.gvar(4.0, 0.1)])}
 prior = {'a': gv.gvar(2, 0.5)}
