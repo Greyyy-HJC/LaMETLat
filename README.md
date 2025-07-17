@@ -55,6 +55,7 @@ import lametlat as lml
 - `lametlat/utils/`: Utility functions
 - `examples/`: Jupyter notebooks examples of using the package
 - `example_plots/`: Examples plots from the [pion TMD paper](https://arxiv.org/pdf/2504.04625)
+- `debug/`: Debug tests
 
 ## Contributing
 
