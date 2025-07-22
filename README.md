@@ -52,6 +52,7 @@ import lametlat as lml
 - `lametlat/gsfit/`: Ground state fitting algorithms, including Lanczos
 - `lametlat/extrapolation/`: Extrapolation methods
 - `lametlat/renormalization/`: Renormalization techniques
+- `lametlat/matching/`: Matching kernels for LaMET
 - `lametlat/utils/`: Utility functions
 - `examples/`: Jupyter notebooks examples of using the package
 - `example_plots/`: Examples plots from the [pion TMD paper](https://arxiv.org/pdf/2504.04625)

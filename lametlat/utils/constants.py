@@ -10,7 +10,6 @@ NF = 3  # number of flavors
 CA = 3
 TF = 1 / 2
 
-
 def lat_unit_convert(val, a, Ls, dimension):
     """Convert Lattice unit to GeV / fm.
 
@@ -74,27 +73,25 @@ def alphas_nloop(mu, order=0, Nf=3):
     else:
         print("NNNLO running coupling not coded.")
 
-def Lz_func(z, a, mu=2):
+def Lz_func(z_fm, mu=2):
     '''
     This is the log term that commonly appears in the perturbation theory.
-    z: z-coordinate in lattice unit
-    a: lattice spacing, fm
+    z_fm: z-coordinate in fm
     mu: renormalization scale, GeV
     '''
-    zfm = z * a
-    z2mu2 = zfm ** 2 * mu ** 2 / ( GEV_FM ** 2 )
+    z2mu2 = z_fm ** 2 * mu ** 2 / ( GEV_FM ** 2 )
     val = z2mu2 * np.exp(2 * np.euler_gamma) / 4
     
     return np.log(val)
 
-def c0_func_nlo(z, a, mu=2, pol="unpolarized"):
+def CG_c0_func_nlo(z_fm, mu=2, pol="unpolarized", asorder=0):
     '''
     This is the c0 function that appears in the SDF.
-    z: z-coordinate in lattice unit
-    a: lattice spacing, fm
+    asorder: order of alpha_s, 0 for LO, 1 for NLO, 2 for NNLO
+    z_fm: z-coordinate in fm
     mu: renormalization scale, GeV
     '''
-    alphas = alphas_nloop(mu=mu, order=2, Nf=3)
+    alphas = alphas_nloop(mu=mu, order=asorder, Nf=3)
     
     if pol == "unpolarized":
         # gamma t / gamma t gamma 5
@@ -106,23 +103,39 @@ def c0_func_nlo(z, a, mu=2, pol="unpolarized"):
         # gamma z gamma y
         const_term = 0
         
-    return 1 + alphas * CF / (4 * np.pi) * (const_term - Lz_func(z, a, mu))
+    return 1 + alphas * CF / (4 * np.pi) * (const_term - Lz_func(z_fm, mu))
 
-def c0_func_ll(z, a, mu=2, coeff=1, Nf=3):
+def CG_c0_func_ll(z_fm, mu=2, coeff=1, Nf=3, asorder=0):
     '''
     This is the c0 function that appears in the SDF, after RGR up to LL, see Eq. (B6) in 2504.04625
-    z: z-coordinate in lattice unit
-    a: lattice spacing, fm
+    z_fm: z-coordinate in fm
     mu: renormalization scale, GeV
     coeff: coefficient of the initial scale mu0, can vary from 0.8 to 1.2
     Nf: number of flavors
     '''
-    mu0 = 2 * coeff * np.exp(- np.euler_gamma) / (z * a) * GEV_FM # GeV
-    a0 = alphas_nloop(mu=mu0, order=2, Nf=Nf)
-    a1 = alphas_nloop(mu=mu, order=2, Nf=Nf)
+    mu0 = 2 * coeff * np.exp(- np.euler_gamma) / z_fm * GEV_FM # GeV
+    a0 = alphas_nloop(mu=mu0, order=asorder, Nf=Nf)
+    a1 = alphas_nloop(mu=mu, order=asorder, Nf=Nf)
     
     temp = CF / beta(0, Nf) * np.log( a1 / a0 )
     
     return np.exp(temp) #! Since the log term can be large, we should use exp(temp) instead of 1 + temp for resummed results.
 
+# %%
+if __name__ == "__main__":
+    from lametlat.utils.plot_settings import *
+    
+    fig, ax = default_plot()
+    
+    mu_range = np.linspace(0.5, 4, 100)
+    
+    for order in [0,1,2]:
+        alphas = [alphas_nloop(mu=mu, order=order, Nf=3) for mu in mu_range]
+        ax.plot(mu_range, alphas, label=f'Order {order}')
+    
+    ax.set_xlabel(r'$\mu$ [GeV]', **fs_p)
+    ax.set_ylabel(r'$\alpha_s(\mu)$', **fs_p)
+    ax.legend(loc="upper right", ncol=1, **fs_small_p)
+    ax.grid(True)
+    plt.show()
 # %%
