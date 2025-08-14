@@ -331,6 +331,9 @@ def GI_tmd_kernel_RGR(x, pz_gev, mu=2, vary_eps=1):
 
     return temp1 + temp2 + temp3 + temp4
 
+def GI_tmdwf_kernel_fixed(x, pz_gev, mu=2):
+    return GI_tmd_kernel_fixed(x, pz_gev, mu) * GI_tmd_kernel_fixed(1-x, pz_gev, mu)
+
 def GI_tmdwf_kernel_RGR(x, pz_gev, mu=2, vary_eps=1):
     return GI_tmd_kernel_RGR(x, pz_gev, mu, vary_eps) * GI_tmd_kernel_RGR(1-x, pz_gev, mu, vary_eps)
 
