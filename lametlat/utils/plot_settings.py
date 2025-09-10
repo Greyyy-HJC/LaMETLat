@@ -75,9 +75,9 @@ fig_size = (fig_width, fig_width / gr)
 
 # Default plot axes for general plots
 plt_axes = [0.15, 0.15, 0.8, 0.8]  # left, bottom, width, height
-fs_p = {"fontsize": 16}  # font size of text, label, ticks
-fs_small_p = {"fontsize": 12}  # small font size of text, label, ticks
-ls_p = {"labelsize": 16}
+fs_p = {"fontsize": 18}  # font size of text, label, ticks
+fs_small_p = {"fontsize": 15}  # small font size of text, label, ticks
+ls_p = {"labelsize": 18}
 
 # Errorbar plot settings
 errorb = {

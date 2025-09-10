@@ -4,6 +4,23 @@ All kinds of fit functions for the z-dependence extrapolation.
 
 import numpy as np
 
+def exp_sin_fcn(m0=0):
+    """
+    No Regge behavior.
+
+    Args:
+        lam_ls (list): lambda = z * Pz
+        p (prior): prior dict
+
+    Returns:
+        val: function value
+    """
+    def fcn(lam_ls, p):
+        return ( p["b"] * np.sin(p["c"] * lam_ls + p["d"]) ) * np.exp( -lam_ls * (p["m"] + m0) ) / ( lam_ls**p["n"] )
+    
+    return fcn
+
+
 def exp_poly_fcn(lam_ls, p):
     """
     No Regge behavior.
@@ -31,20 +48,6 @@ def exp_power_fcn(lam_ls, p):
     """
     return p["a"] * np.exp( -lam_ls * p["m"] ) / ( lam_ls**p["n"] )
 
-
-
-def exp_sin_fcn(lam_ls, p):
-    """
-    No Regge behavior.
-
-    Args:
-        lam_ls (list): lambda = z * Pz
-        p (prior): prior dict
-
-    Returns:
-        val: function value
-    """
-    return ( p["b"] * np.sin(p["c"] * lam_ls + p["d"]) ) * np.exp( -lam_ls * p["m"] ) / ( lam_ls**p["n"] )
 
 def poly_fcn(lam_ls, p):
     """

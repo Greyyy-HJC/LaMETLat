@@ -15,16 +15,12 @@ def Regge_prior(): # For Regge behavior
 
 def exp_decay_prior():
     priors = gv.BufferDict()
-    priors["a"] = gv.gvar(1, 1) # gv.gvar(0, 1) # gv.gvar(0, 10)
-    priors["b"] = gv.gvar(0, 1) # gv.gvar(0, 1) # gv.gvar(0, 10)
-    priors["c"] = gv.gvar(0, 1) # gv.gvar(0, 1) # gv.gvar(0, 10)
-    priors["d"] = gv.gvar(0, 1) # gv.gvar(0, 1) # gv.gvar(0, 10)
-    priors["e"] = gv.gvar(0, 1) # gv.gvar(0, 1) # gv.gvar(0, 10)
+    priors["a"] = gv.gvar(1, 10) # gv.gvar(0, 1) # gv.gvar(0, 10)
+    priors["b"] = gv.gvar(0, 10) # gv.gvar(0, 1) # gv.gvar(0, 10)
+    priors["c"] = gv.gvar(0, 10) # gv.gvar(0, 1) # gv.gvar(0, 10)
+    priors["d"] = gv.gvar(0, 10) # gv.gvar(0, 1) # gv.gvar(0, 10)
+    priors["e"] = gv.gvar(0, 10) # gv.gvar(0, 1) # gv.gvar(0, 10)
     priors["log(n)"] = gv.gvar(0.7, 1) # gv.gvar(0.7, 1)
-    priors["log(m)"] = gv.gvar(-2.4, 10) # gv.gvar(-2.4, 10)
+    priors["log(m)"] = gv.gvar(-2, 2) # gv.gvar(-2.4, 10)
     
     return priors
-
-
-
-    
