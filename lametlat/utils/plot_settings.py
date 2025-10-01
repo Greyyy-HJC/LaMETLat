@@ -19,6 +19,8 @@ blue = "#508EAD"
 grape = "#635BB1"
 violet = "#7C5AB8"
 fuschia = "#C3559F"
+brown = "#6B3F3F"
+
 
 color_ls = [
     blue,
@@ -33,6 +35,7 @@ color_ls = [
     peach,
     sunkist,
     yellow,
+    brown,
 ]
 
 # Marker settings
