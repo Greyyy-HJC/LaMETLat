@@ -189,6 +189,27 @@ def bs_ls_avg(bs_ls, axis=0):
     return gv_ls
 
 
+def bs_ls_avg_no_corr(bs_ls, axis=0):
+    """
+    Average a bootstrap list without using covariance (no correlation).
+    Error is estimated as half the difference between the 84th and 16th percentile (i.e., 1-sigma of a normal dist).
+    Returns a gvar list built from mean and this error.
+    """
+    bs_ls = np.array(bs_ls)
+    if axis != 0:
+        bs_ls = np.swapaxes(bs_ls, 0, axis)
+    shape = np.shape(bs_ls)
+    bs_ls = np.reshape(bs_ls, (shape[0], -1))
+
+    mid = np.median(bs_ls, axis=0)
+    p16 = np.percentile(bs_ls, 16, axis=0)
+    p84 = np.percentile(bs_ls, 84, axis=0)
+    err = 0.5 * (p84 - p16)
+    gv_ls = gv.gvar(mid, err)
+    gv_ls = np.reshape(gv_ls, shape[1:])
+    return gv_ls
+    
+
 def bs_dic_avg(dic):
     """Average the bootstrap dictionary, the axis=0 of each key is the bootstrap samples.
 

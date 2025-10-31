@@ -53,6 +53,23 @@ def sudakov_kernel(Q, mu=2, epsrel=1e-3):
     # * NLL means: 1-loop gammaC (alphas * L) + 2-loop cusp anomalous dimension (alphas^2 * L^2) + tree level hard kernel (1)
     return 1 * np.exp(int)
 
+def CG_tmd_kernel_fixed(x, pz_gev, mu=2):
+    """
+    From 2311.01391, pz in GeV
+    """
+    zeta = (2 * x * pz_gev) ** 2
+
+    temp = (
+        1 / 2 * (np.log((mu**2) / zeta)) ** 2
+        + 3 * np.log((mu**2) / zeta)
+        + 12
+        - np.pi**2 * 7 / 12
+    )
+
+    h = -CF * alphas_nloop(mu, order=2, Nf=3) / (4 * np.pi) * temp
+
+    return 1 + h
+    
 
 def CG_tmd_kernel_RGR(x, pz_gev, mu=2, vary_eps=1):
     """
@@ -82,6 +99,10 @@ def CG_tmd_kernel_RGR(x, pz_gev, mu=2, vary_eps=1):
 
     return h
 
+def CG_tmdwf_kernel_fixed(x, pz_gev, mu=2):
+    return CG_tmd_kernel_fixed(x, pz_gev, mu) * CG_tmd_kernel_fixed(
+        1 - x, pz_gev, mu
+    )
 
 def CG_tmdwf_kernel_RGR(x, pz_gev, mu=2, vary_eps=1):
     return CG_tmd_kernel_RGR(x, pz_gev, mu, vary_eps) * CG_tmd_kernel_RGR(
@@ -131,9 +152,7 @@ def CG_tmdpdf_kernel_RGR(x, pz_gev, mu=2, vary_eps=1):
     """
     From App.D.2 of https://arxiv.org/pdf/1002.2213, pz in GeV
     """
-    return CG_tmd_kernel_RGR(x, pz_gev, mu, vary_eps) * CG_tmd_kernel_RGR(
-        x, pz_gev, mu, vary_eps
-    )
+    return CG_tmd_kernel_RGR(x, pz_gev, mu, vary_eps) * CG_tmd_kernel_RGR(x, pz_gev, mu, vary_eps)
 
 
 #!########################################################################################
@@ -339,3 +358,32 @@ def GI_tmdwf_kernel_RGR(x, pz_gev, mu=2, vary_eps=1):
 
 # %%
 
+if __name__ == "__main__":
+    from lametlat.utils.plot_settings import *
+    
+    pz_gev = 2
+    x_ls = np.linspace(0.1, 0.9, 100)
+    cg_tmdwf_fixed = CG_tmdwf_kernel_fixed(x_ls, pz_gev, mu=2)
+    cg_tmdwf_rgr = CG_tmdwf_kernel_RGR(x_ls, pz_gev, mu=2, vary_eps=1)
+    
+    fig, ax = default_plot()
+    ax.plot(x_ls, cg_tmdwf_fixed, label='CG TMDWF kernel Fixed')
+    ax.plot(x_ls, cg_tmdwf_rgr, label='CG TMDWF kernel RGR')
+    ax.legend(loc='upper right', **fs_small_p)
+    ax.set_xlabel(r'$x$', **fs_p)
+    plt.tight_layout()
+    plt.show()
+    
+    
+    cg_tmdpdf_fixed = CG_tmdpdf_kernel_fixed(x_ls, pz_gev, mu=2)
+    cg_tmdpdf_rgr = CG_tmdpdf_kernel_RGR(x_ls, pz_gev, mu=2, vary_eps=1)
+    
+    fig, ax = default_plot()
+    ax.plot(x_ls, cg_tmdpdf_fixed, label='CG TMDPDF kernel Fixed')
+    ax.plot(x_ls, cg_tmdpdf_rgr, label='CG TMDPDF kernel RGR')
+    ax.legend(loc='upper right', **fs_small_p)
+    ax.set_xlabel(r'$x$', **fs_p)
+    plt.tight_layout()
+    plt.show()
+
+# %%

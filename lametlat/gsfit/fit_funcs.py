@@ -175,3 +175,17 @@ def da_im_fcn(da_t, p, Lt):
     val = z0 / (2 * e0) * p["O00_im"] * ( np.exp( -e0 * da_t ) + np.exp( -e0 * ( Lt - da_t ) ) ) + z1 / (2 * e1) * p["O01_im"] * ( np.exp( -e1 * da_t ) + np.exp( -e1 * ( Lt - da_t ) ) )
 
     return val
+
+#* This is for the FF fit, check Eq. (D2) in https://arxiv.org/pdf/2504.04625
+
+def ff_ratio_fcn(x, p):
+    dE = p["dE1"]
+    
+    c1 = p["re_c1"]
+    c2 = p["re_c2"]
+    
+    ra_t, ra_tau = x
+    
+    #* -1 for sign convention to keep ff positive
+    val = -1 * p["ff"] * (1 + c1 * ( np.exp( - dE * ra_tau ) + np.exp( - dE * ( ra_t - ra_tau ) ) ) ) / ( 1 + c2 * np.exp( - dE * ra_t / 2 )  ) 
+    return val

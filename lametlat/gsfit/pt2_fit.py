@@ -40,7 +40,7 @@ def pt2_two_state_fit(pt2_avg, tmin, tmax, Lt, normalize=True, label=None):
 
     # Normalize the 2pt data only once for each dataset
     if normalize:
-        normalization_factor = pt2_avg[0]
+        normalization_factor = abs(pt2_avg[0].mean)
         fit_pt2 = pt2_avg[tmin:tmax] / normalization_factor
     else:
         fit_pt2 = pt2_avg[tmin:tmax]
