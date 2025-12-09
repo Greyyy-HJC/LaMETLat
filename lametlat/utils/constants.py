@@ -121,6 +121,22 @@ def CG_c0_func_ll(z_fm, mu=2, coeff=1, Nf=3, asorder=0):
     
     return np.exp(temp) #! Since the log term can be large, we should use exp(temp) instead of 1 + temp for resummed results.
 
+def CG_z_psi_ll(mu0, mu=2, coeff=1, Nf=3, asorder=0):
+    '''
+    This is the renormalization factor of quark bilinears, up to LL, which is the reciprocal of C0 LL.
+    mu0: initial scale, usually set to 1/a, GeV
+    mu: renormalization scale, GeV
+    Nf: number of flavors
+    asorder: order of alpha_s, 0 for LO, 1 for NLO, 2 for NNLO
+    '''
+    a0 = alphas_nloop(mu=mu0 * coeff, order=asorder, Nf=Nf)
+    a1 = alphas_nloop(mu=mu, order=asorder, Nf=Nf)
+    
+    temp = CF / beta(0, Nf) * np.log( a1 / a0 )
+    
+    return np.exp( - temp) #! Since the log term can be large, we should use exp(temp) instead of 1 + temp for resummed results.
+
+
 # %%
 if __name__ == "__main__":
     from lametlat.utils.plot_settings import *
