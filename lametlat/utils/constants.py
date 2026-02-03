@@ -105,7 +105,7 @@ def CG_c0_func_nlo(z_fm, mu=2, pol="unpolarized", asorder=0):
         
     return 1 + alphas * CF / (4 * np.pi) * (const_term - Lz_func(z_fm, mu))
 
-def CG_c0_func_ll(z_fm, mu=2, coeff=1, Nf=3, asorder=0):
+def CG_c0_func_ll(z_fm, mu=2, coeff=1, Nf=3, pol="unpolarized", asorder=0):
     '''
     This is the c0 function that appears in the SDF, after RGR up to LL, see Eq. (B6) in 2504.04625
     z_fm: z-coordinate in fm
@@ -119,7 +119,10 @@ def CG_c0_func_ll(z_fm, mu=2, coeff=1, Nf=3, asorder=0):
     
     temp = CF / beta(0, Nf) * np.log( a1 / a0 )
     
-    return np.exp(temp) #! Since the log term can be large, we should use exp(temp) instead of 1 + temp for resummed results.
+    if pol == "transversity":
+        return 1 #! Since the transversity has a zero anomalous dimension at NLO, the LL correction is 1.
+    else:
+        return np.exp(temp) #! Since the log term can be large, we should use exp(temp) instead of 1 + temp for resummed results.
 
 def CG_z_psi_ll(mu0, mu=2, coeff=1, Nf=3, asorder=0):
     '''

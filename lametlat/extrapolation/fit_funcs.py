@@ -4,6 +4,32 @@ All kinds of fit functions for the z-dependence extrapolation.
 
 import numpy as np
 
+
+def exp_asym_re_fcn(m0=0):
+    """
+    Asymptotic form from https://arxiv.org/pdf/2601.12189, Eq.(2.4), the 1 / lambda^n term is for CG cases.
+
+    Args:
+        m0 (int, optional): minimum value of meff, usually set to 0.1 GeV / P_mom.
+    """
+    def fcn(lam_ls, p):
+        return ( p["b"] * np.cos(p["c"]) + p["d"] * np.cos(p["e"]) / abs(lam_ls) ) * np.exp( -lam_ls * (p["m"] + m0) ) / ( lam_ls**p["n"] )
+    
+    return fcn
+
+
+def exp_asym_im_fcn(m0=0):
+    """
+    Asymptotic form from https://arxiv.org/pdf/2601.12189, Eq.(2.4), the 1 / lambda^n term is for CG cases.
+
+    Args:
+        m0 (int, optional): minimum value of meff, usually set to 0.1 GeV / P_mom.
+    """
+    def fcn(lam_ls, p):
+        return ( p["b"] * np.sin(p["c"]) + p["d"] * np.sin(p["e"]) / abs(lam_ls) ) * np.exp( -lam_ls * (p["m"] + m0) ) / ( lam_ls**p["n"] )
+    
+    return fcn
+
 def exp_sin_fcn(m0=0):
     """
     No Regge behavior.

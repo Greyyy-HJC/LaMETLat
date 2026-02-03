@@ -26,7 +26,11 @@ def cusp2(Nf=3):
     )
 
 
-def gamma_c():
+def CG_gamma_c():
+    '''
+    From Eq.(A4) in https://arxiv.org/pdf/2504.04625,
+    which is the CG version of gamma_mu in https://arxiv.org/pdf/2307.12359, Eq.(C9)
+    '''
     return -6 * CF
 
 
@@ -51,7 +55,7 @@ def sudakov_kernel(Q, mu=2, epsrel=1e-3):
 
     # * till NLL order, the finite term at alphas^1 of the hard kernel should be dropped.
     # * NLL means: 1-loop gammaC (alphas * L) + 2-loop cusp anomalous dimension (alphas^2 * L^2) + tree level hard kernel (1)
-    return 1 * np.exp(int)
+    return 1 * np.exp(int) #! Since the log term can be large, we should use exp(temp) instead of 1 + temp for resummed results.
 
 def CG_tmd_kernel_fixed(x, pz_gev, mu=2):
     """
@@ -78,24 +82,28 @@ def CG_tmd_kernel_RGR(x, pz_gev, mu=2, vary_eps=1):
     zeta = (2 * x * pz_gev * vary_eps) ** 2
     b0 = beta(order=0, Nf=3)
     b1 = beta(order=1, Nf=3)
-    a0 = alphas_nloop(np.sqrt(zeta), order=2, Nf=3)
-    amu = alphas_nloop(mu, order=2, Nf=3)
+    
+    #! here NLL needs 2-loop cusp, which should use 2-loop alphas
+    a0_order0 = alphas_nloop(np.sqrt(zeta), order=0, Nf=3) # 1-loop
+    a0_order1 = alphas_nloop(np.sqrt(zeta), order=1, Nf=3) # 2-loop
+    amu_order0 = alphas_nloop(mu, order=0, Nf=3)
+    amu_order1 = alphas_nloop(mu, order=1, Nf=3)
+    r_order0 = amu_order0 / a0_order0
+    r_order1 = amu_order1 / a0_order1
 
-    r = amu / a0
-
-    term1 = 4 * np.pi / a0 * (1 - 1 / r - np.log(r))
-    term2 = (cusp1() / cusp0() - b1 / b0) * (1 - r + np.log(r))
-    term3 = b1 / (2 * b0) * (np.log(r) ** 2)
+    term1 = 4 * np.pi / a0_order1 * (1 - 1 / r_order1 - np.log(r_order1))
+    term2 = (cusp1() / cusp0() - b1 / b0) * (1 - r_order1 + np.log(r_order1))
+    term3 = b1 / (2 * b0) * (np.log(r_order1) ** 2)
 
     k_cusp = -cusp0() / (4 * (b0**2)) * (term1 + term2 + term3)
 
-    k_gammac = -gamma_c() / (2 * b0) * np.log(r)
+    k_gammac = -CG_gamma_c() / (2 * b0) * np.log(r_order0)
 
     integral = -2 * k_cusp + 1 * k_gammac  # * for DA, it is the Wilson coefficient
 
     # * till NLL order, the finite term at alphas^1 of the hard kernel should be dropped.
     # * NLL means: 1-loop gammaC (alphas * L) + 2-loop cusp anomalous dimension (alphas^2 * L^2) + tree level hard kernel (1)
-    h = 1 * np.exp(integral)
+    h = 1 * np.exp(integral) #! Since the log term can be large, we should use exp(temp) instead of 1 + temp for resummed results.
 
     return h
 
