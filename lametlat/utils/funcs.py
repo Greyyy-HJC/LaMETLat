@@ -18,11 +18,12 @@ def gv_dic_save_to_h5(gv_dic, N_samp, file_path):
         for key, gv_ls in gv_dic.items():
             f.create_dataset(key, data=gv_ls_to_samples_corr(gv_ls, N_samp))
 
-def constant_fit(data):
+def constant_fit(data, const_prior=gv.gvar(0, 100)):
     """do a constant fit to the data
 
     Args:
         data (list): a list of data to do the constant fit
+        const_prior (gvar): prior for the constant term
 
     Returns:
         gvar: the result of the constant fit
@@ -30,7 +31,7 @@ def constant_fit(data):
     def fcn(x, p):
         return x * 0 + p['const']
     
-    priors = gv.BufferDict({'const': gv.gvar(0, 100)})
+    priors = gv.BufferDict({'const': const_prior})
     x = np.arange(len(data))
     
     fit_res = lsf.nonlinear_fit(data=(x, data), prior=priors, fcn=fcn, maxit=10000, svdcut=1e-100, fitter='scipy_least_squares')
