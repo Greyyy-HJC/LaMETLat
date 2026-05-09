@@ -1,7 +1,15 @@
+import gvar as gv
 import numpy as np
 import pytest
+from scipy.interpolate import interp1d
 
-from lametlat.correlators import bad_point_filter, bin_data, bootstrap, jackknife
+from lametlat.correlators import (
+    bad_point_filter,
+    bin_data,
+    bootstrap,
+    gvar_ls_interpolate,
+    jackknife,
+)
 
 
 def test_bad_point_filter_replaces_large_entries():
@@ -70,3 +78,18 @@ def test_jackknife_axis1():
 def test_jackknife_needs_two_samples():
     with pytest.raises(ValueError):
         jackknife(np.array([1.0]))
+
+
+def test_gvar_ls_interpolate_uses_mean_and_sdev_envelopes():
+    x = np.arange(5, dtype=float)
+    x_new = np.linspace(0, 4, 9)
+    mean = np.array([0.0, 1.0, 0.5, 1.5, 1.0])
+    sdev = np.array([0.10, 0.15, 0.12, 0.20, 0.18])
+    values = gv.gvar(mean, sdev)
+
+    interpolated = gvar_ls_interpolate(x, values, x_new, n_samp=7, kind="linear")
+
+    expected_mean = interp1d(x, mean, kind="linear")(x_new)
+    expected_sdev = interp1d(x, sdev, kind="linear")(x_new)
+    np.testing.assert_allclose(gv.mean(interpolated), expected_mean)
+    np.testing.assert_allclose(gv.sdev(interpolated), expected_sdev)

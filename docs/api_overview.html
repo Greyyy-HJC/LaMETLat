@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>lametlat API Overview</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2933;
+      --muted: #64748b;
+      --line: #d7dee8;
+      --panel: #ffffff;
+      --panel-soft: #f7fafc;
+      --accent: #2f7d78;
+      --accent-dark: #1d5f5a;
+      --warm: #b45f3a;
+      --code: #0f172a;
+      --code-bg: #eef4f7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(180deg, rgba(47, 125, 120, 0.12), rgba(255, 255, 255, 0) 320px),
+        #fbfcfd;
+      line-height: 1.55;
+    }
+
+    header {
+      padding: 56px max(24px, calc((100vw - 1180px) / 2)) 28px;
+    }
+
+    h1 {
+      max-width: 880px;
+      margin: 0;
+      font-size: clamp(2.25rem, 6vw, 4.5rem);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 820px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px 56px;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0 34px;
+    }
+
+    .nav a {
+      color: var(--accent-dark);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: rgba(255, 255, 255, 0.82);
+      font-weight: 650;
+      font-size: 0.92rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 34px;
+    }
+
+    .summary-card,
+    .module {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 12px 32px rgba(31, 41, 51, 0.07);
+    }
+
+    .summary-card {
+      padding: 18px;
+    }
+
+    .summary-card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent-dark);
+      font-size: 1.05rem;
+    }
+
+    .summary-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .module {
+      margin: 20px 0;
+      overflow: hidden;
+    }
+
+    .module-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: start;
+      padding: 22px;
+      background: linear-gradient(90deg, #ffffff, var(--panel-soft));
+      border-bottom: 1px solid var(--line);
+    }
+
+    .module h2 {
+      margin: 0 0 6px;
+      font-size: 1.45rem;
+      letter-spacing: 0;
+    }
+
+    .module-desc {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .tag {
+      white-space: nowrap;
+      color: #ffffff;
+      background: var(--accent);
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    th,
+    td {
+      padding: 12px 16px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      background: #fbfdff;
+      font-size: 0.8rem;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    code {
+      color: var(--code);
+      background: var(--code-bg);
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.9em;
+    }
+
+    pre {
+      margin: 0;
+      padding: 16px;
+      overflow: auto;
+      color: #dbeafe;
+      background: #10202f;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    pre code {
+      color: inherit;
+      background: transparent;
+      padding: 0;
+    }
+
+    .example {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 16px;
+      margin: 26px 0 8px;
+    }
+
+    .example-card {
+      padding: 20px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 12px 32px rgba(31, 41, 51, 0.07);
+    }
+
+    .example-card h2 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .example-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 30px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 760px) {
+      header {
+        padding-top: 34px;
+      }
+
+      .module-head,
+      .example {
+        grid-template-columns: 1fr;
+      }
+
+      .tag {
+        width: fit-content;
+      }
+
+      table,
+      tbody,
+      tr,
+      td,
+      th {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        border-bottom: 1px solid var(--line);
+      }
+
+      tr:last-child {
+        border-bottom: 0;
+      }
+
+      td {
+        border: 0;
+        padding: 8px 16px;
+      }
+
+      td:first-child {
+        padding-top: 14px;
+      }
+
+      td:last-child {
+        padding-bottom: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>lametlat API Overview</h1>
+    <p class="subtitle">
+      A compact guide to the package modules, the public functions they expose,
+      and the common analysis tasks they support in LaMET lattice-QCD workflows.
+    </p>
+  </header>
+
+  <main class="shell">
+    <nav class="nav" aria-label="Module links">
+      <a href="#correlators">correlators</a>
+      <a href="#ground-state">ground_state</a>
+      <a href="#plotting">plotting</a>
+      <a href="#fourier-transform">fourier_transform</a>
+      <a href="#perturbative-matching">perturbative_matching</a>
+      <a href="#utils">utils</a>
+    </nav>
+
+    <section class="summary-grid" aria-label="Package summary">
+      <div class="summary-card">
+        <strong>Read and resample</strong>
+        <p>Load HDF5 correlators, build jackknife/bootstrap samples, and convert samples into <code>gvar</code> arrays.</p>
+      </div>
+      <div class="summary-card">
+        <strong>Fit physics models</strong>
+        <p>Use two-state and form-factor helpers to extract ground-state observables.</p>
+      </div>
+      <div class="summary-card">
+        <strong>Transform and plot</strong>
+        <p>Run Fourier-transform utilities, extrapolate long-distance tails, and generate publication-style figures.</p>
+      </div>
+    </section>
+
+    <section class="module" id="correlators">
+      <div class="module-head">
+        <div>
+          <h2><code>lametlat.correlators</code></h2>
+          <p class="module-desc">Reader-side tools for correlator data, ratios, resampling, and <code>gvar</code> aggregation.</p>
+        </div>
+        <span class="tag">data preparation</span>
+      </div>
+      <table>
+        <thead><tr><th>Function</th><th>Purpose</th><th>Typical call</th></tr></thead>
+        <tbody>
+          <tr><td><code>read_pt2_h5</code>, <code>read_pt3_h5</code>, <code>read_qda_h5</code></td><td>Read two-point, three-point, and qDA correlator data from project HDF5 layouts.</td><td><code>read_pt2_h5(path, pz=0)</code></td></tr>
+          <tr><td><code>get_qda_ratio_data</code>, <code>get_pt3_ratio_data</code></td><td>Construct ratio observables from preprocessed correlator arrays.</td><td><code>get_pt3_ratio_data(pt2, pt3)</code></td></tr>
+          <tr><td><code>get_sum_data</code>, <code>get_fh_data</code></td><td>Build summed-ratio and Feynman-Hellmann style derived data.</td><td><code>get_sum_data(ratio)</code></td></tr>
+          <tr><td><code>bootstrap</code>, <code>jackknife</code>, <code>apply_resampling</code></td><td>Generate resampled ensemble averages along a chosen configuration axis.</td><td><code>bootstrap(data, n_samples=200)</code></td></tr>
+          <tr><td><code>bin_data</code>, <code>bad_point_filter</code></td><td>Bin nearby configurations and replace unusually large raw entries when requested.</td><td><code>bin_data(data, bin_size=4)</code></td></tr>
+          <tr><td><code>jk_ls_avg</code>, <code>bs_ls_avg</code>, <code>bs_ls_avg_no_corr</code></td><td>Turn jackknife/bootstrap samples into <code>gvar</code> arrays with or without covariance.</td><td><code>bs_ls_avg(samples, axis=0)</code></td></tr>
+          <tr><td><code>jk_dict_avg</code>, <code>bs_dict_avg</code></td><td>Average dictionaries of resampled arrays while preserving key structure.</td><td><code>jk_dict_avg(sample_dict)</code></td></tr>
+          <tr><td><code>add_error_to_sample</code></td><td>Attach shared sample covariance to each bootstrap or jackknife realization.</td><td><code>add_error_to_sample(samples, mode="bs")</code></td></tr>
+          <tr><td><code>gvar_ls_interpolate</code></td><td>Interpolate <code>gvar</code> means and standard deviations onto a new coordinate grid.</td><td><code>gvar_ls_interpolate(x, y_gv, x_new)</code></td></tr>
+          <tr><td><code>pt2_to_meff</code>, <code>pt2_to_meff_solve</code></td><td>Convert two-point correlators into effective masses.</td><td><code>pt2_to_meff(pt2_gv)</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="module" id="ground-state">
+      <div class="module-head">
+        <div>
+          <h2><code>lametlat.ground_state</code></h2>
+          <p class="module-desc">Fit models, priors, and high-level fit wrappers for ground-state extraction.</p>
+        </div>
+        <span class="tag">fits</span>
+      </div>
+      <table>
+        <thead><tr><th>Function</th><th>Purpose</th><th>Typical call</th></tr></thead>
+        <tbody>
+          <tr><td><code>general_prior</code></td><td>Create default priors for multi-state correlator fits.</td><td><code>prior = general_prior(nstate=2)</code></td></tr>
+          <tr><td><code>pt2_re_fcn</code>, <code>pt2_fit</code>, <code>pt2_two_state_fit</code></td><td>Evaluate and fit two-point correlator models.</td><td><code>pt2_fit(pt2_gv, tmin, tmax, Lt)</code></td></tr>
+          <tr><td><code>pt3_ratio_re_fcn</code>, <code>pt3_ratio_im_fcn</code></td><td>Evaluate real and imaginary three-point ratio model components.</td><td><code>pt3_ratio_re_fcn((t, tau), p)</code></td></tr>
+          <tr><td><code>sum_re_fcn</code>, <code>sum_im_fcn</code></td><td>Evaluate summed-ratio models.</td><td><code>sum_re_fcn(tsep, p)</code></td></tr>
+          <tr><td><code>fh_re_fcn</code>, <code>fh_im_fcn</code></td><td>Evaluate Feynman-Hellmann model components.</td><td><code>fh_re_fcn(tsep, p)</code></td></tr>
+          <tr><td><code>qda_re_fcn</code>, <code>qda_im_fcn</code></td><td>Evaluate qDA fit components.</td><td><code>qda_re_fcn(t, p)</code></td></tr>
+          <tr><td><code>ff_ratio_fcn</code>, <code>ff_sum_fcn</code></td><td>Evaluate form-factor ratio and summed-ratio fit models.</td><td><code>ff_ratio_fcn((t, tau), p)</code></td></tr>
+          <tr><td><code>ff_ratio_two_state_fit</code>, <code>ff_sum_two_state_fit</code>, <code>ff_joint_two_state_fit</code></td><td>Run two-state form-factor fits on ratio, sum, or joint data.</td><td><code>ff_joint_two_state_fit(ratio, sums)</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="module" id="plotting">
+      <div class="module-head">
+        <div>
+          <h2><code>lametlat.plotting</code></h2>
+          <p class="module-desc">Matplotlib helpers that keep visualization separate from numerical routines.</p>
+        </div>
+        <span class="tag">figures</span>
+      </div>
+      <table>
+        <thead><tr><th>Function</th><th>Purpose</th><th>Typical call</th></tr></thead>
+        <tbody>
+          <tr><td><code>pt2_plot</code></td><td>Plot two-point correlators and effective masses, optionally with fit overlays.</td><td><code>pt2_plot([pt2_gv], fit_results=fit)</code></td></tr>
+          <tr><td><code>pt3_ratio_plot</code></td><td>Plot real and optional imaginary three-point ratios by source-sink separation.</td><td><code>pt3_ratio_plot(tau, ratio_re, ratio_im)</code></td></tr>
+          <tr><td><code>ff_ratio_plot</code>, <code>ff_sum_plot</code>, <code>ff_joint_plot</code></td><td>Plot form-factor ratio, summed-ratio, and joint-fit views.</td><td><code>ff_ratio_plot(tau, ratio, fit_result=fit)</code></td></tr>
+          <tr><td><code>qda_ratio_plot</code>, <code>fh_plot</code></td><td>Plot qDA and Feynman-Hellmann observables.</td><td><code>qda_ratio_plot(t, qda_re, qda_im)</code></td></tr>
+          <tr><td><code>extrapolation_comparison_plot</code></td><td>Compare original lambda-space data with extrapolated real and imaginary bands.</td><td><code>extrapolation_comparison_plot(lam, re, im, lam_ext, re_ext, im_ext, fit_range, "tag")</code></td></tr>
+          <tr><td><code>plot_surface_from_grid</code></td><td>Render a 3D surface from grid-like data.</td><td><code>plot_surface_from_grid(x, y, z)</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="module" id="fourier-transform">
+      <div class="module-head">
+        <div>
+          <h2><code>lametlat.fourier_transform</code></h2>
+          <p class="module-desc">Discrete Fourier-transform helpers and long-distance extrapolation utilities.</p>
+        </div>
+        <span class="tag">transforms</span>
+      </div>
+      <table>
+        <thead><tr><th>Function</th><th>Purpose</th><th>Typical call</th></tr></thead>
+        <tbody>
+          <tr><td><code>sum_ft</code>, <code>sum_inv_ft</code></td><td>Run one-dimensional summed Fourier transforms and inverse transforms.</td><td><code>sum_ft(x, fx, output_k)</code></td></tr>
+          <tr><td><code>sum_ft_re_im</code>, <code>sum_inv_ft_re_im</code></td><td>Transform separated real and imaginary components.</td><td><code>sum_ft_re_im(x, re, im, k)</code></td></tr>
+          <tr><td><code>two_dim_ft</code>, <code>two_dim_inv_ft</code></td><td>Run radial two-dimensional Fourier transforms between transverse spaces.</td><td><code>two_dim_ft(bT, kT, f_b)</code></td></tr>
+          <tr><td><code>extrapolate_nucleon_cg_qpdf_nla</code></td><td>Fit and extrapolate large-lambda qPDF data with a next-to-leading asymptotic form.</td><td><code>extrapolate_nucleon_cg_qpdf_nla(lam, re, im, fit_range)</code></td></tr>
+          <tr><td><code>weight_linear</code>, <code>weight_logistic</code>, <code>weight_exponential</code></td><td>Transition-weight helpers used by extrapolation workflows.</td><td><code>weight_linear(num_points)</code></td></tr>
+          <tr><td><code>asym_priors</code> and asymptotic-form builders</td><td>Build priors and callable large-distance forms for nucleon qPDF extrapolation.</td><td><code>re_fcn = nucleon_cg_qpdf_nla_re(m0)</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="module" id="perturbative-matching">
+      <div class="module-head">
+        <div>
+          <h2><code>lametlat.perturbative_matching</code></h2>
+          <p class="module-desc">Perturbative kernels and coefficient functions for continuum matching workflows.</p>
+        </div>
+        <span class="tag">matching</span>
+      </div>
+      <table>
+        <thead><tr><th>Function</th><th>Purpose</th><th>Typical call</th></tr></thead>
+        <tbody>
+          <tr><td><code>cusp0</code>, <code>cusp1</code>, <code>cusp2</code>, <code>CG_gamma_c</code></td><td>Return anomalous-dimension coefficients used in matching kernels.</td><td><code>cusp1(Nf=3)</code></td></tr>
+          <tr><td><code>sudakov_kernel</code></td><td>Evaluate a Sudakov evolution kernel between scales.</td><td><code>sudakov_kernel(Q, mu=2.0)</code></td></tr>
+          <tr><td><code>CG_tmd_kernel_fixed</code>, <code>CG_tmd_kernel_RGR</code></td><td>Evaluate fixed-order and RG-resummed TMD matching kernels.</td><td><code>CG_tmd_kernel_RGR(x, pz_gev)</code></td></tr>
+          <tr><td><code>CG_tmdwf_kernel_fixed</code>, <code>CG_tmdwf_kernel_RGR</code></td><td>Evaluate TMD wave-function kernels.</td><td><code>CG_tmdwf_kernel_RGR(x, pz_gev)</code></td></tr>
+          <tr><td><code>CG_tmdpdf_kernel_fixed</code>, <code>CG_tmdpdf_kernel_RGR</code></td><td>Evaluate TMD PDF kernels.</td><td><code>CG_tmdpdf_kernel_fixed(x, pz_gev)</code></td></tr>
+          <tr><td><code>CG_ff_kernel_RGR</code></td><td>Evaluate a form-factor style RG-resummed matching kernel.</td><td><code>CG_ff_kernel_RGR(x1, x2, pz_gev, mu)</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="module" id="utils">
+      <div class="module-head">
+        <div>
+          <h2><code>lametlat.utils</code></h2>
+          <p class="module-desc">Shared constants, converter helpers, logging, and perturbative scalar functions.</p>
+        </div>
+        <span class="tag">support</span>
+      </div>
+      <table>
+        <thead><tr><th>Function or value</th><th>Purpose</th><th>Typical call</th></tr></thead>
+        <tbody>
+          <tr><td><code>GEV_FM</code>, <code>CF</code>, <code>CA</code>, <code>TF</code>, <code>NF</code></td><td>Common constants used across perturbative and lattice-unit calculations.</td><td><code>from lametlat.utils import CF</code></td></tr>
+          <tr><td><code>lat_unit_convert</code></td><td>Convert lattice units using spacing and spatial extent metadata.</td><td><code>lat_unit_convert(val, a, Ls, "momentum")</code></td></tr>
+          <tr><td><code>beta</code>, <code>alphas_nloop</code></td><td>Evaluate beta-function coefficients and running coupling approximations.</td><td><code>alphas_nloop(mu=2.0, order=1)</code></td></tr>
+          <tr><td><code>Lz_func</code>, <code>CG_c0_func_nlo</code>, <code>CG_c0_func_ll</code>, <code>CG_z_psi_ll</code></td><td>Coordinate-space matching and evolution helpers.</td><td><code>CG_c0_func_nlo(z_fm, mu=2.0)</code></td></tr>
+          <tr><td><code>gvar_ls_to_samples_corr</code>, <code>gvar_dic_to_samples_corr</code></td><td>Draw correlated random samples from lists or dictionaries of <code>gvar</code> values.</td><td><code>gvar_ls_to_samples_corr(gv_ls, n_samp=200)</code></td></tr>
+          <tr><td><code>setup_logger</code>, <code>log_nonlinear_fit_quality</code></td><td>Configure package logging and report <code>lsqfit</code> fit quality.</td><td><code>log_nonlinear_fit_quality(fit)</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="example" aria-label="Usage examples">
+      <div class="example-card">
+        <h2>Minimal data flow</h2>
+        <p>Read or prepare data, resample it, fit a model, then plot the result.</p>
+        <pre><code>from lametlat.correlators import bootstrap, bs_ls_avg
+from lametlat.ground_state import pt2_fit
+from lametlat.plotting import pt2_plot
+
+samples = bootstrap(raw_pt2, n_samples=200, axis=0)
+pt2_gv = bs_ls_avg(samples, axis=0)
+fit = pt2_fit(pt2_gv, tmin=3, tmax=12, Lt=32)
+pt2_plot([pt2_gv], fit_results=fit, fit_tmin=3, fit_tmax=12)</code></pre>
+      </div>
+      <div class="example-card">
+        <h2>Extrapolation plot</h2>
+        <p>Use the shared <code>gvar_ls_interpolate</code> path through the plotting helper.</p>
+        <pre><code>from lametlat.plotting import extrapolation_comparison_plot
+
+extrapolation_comparison_plot(
+    lam, re_gv, im_gv,
+    lam_ext, re_ext_gv, im_ext_gv,
+    fit_idx_range=(8, 14),
+    title="nucleon_qpdf",
+    save_path="plots/nucleon_qpdf",
+)</code></pre>
+      </div>
+    </section>
+
+    <footer>
+      This page is a compact manual index, not generated API reference. For implementation details,
+      inspect the corresponding modules under <code>src/lametlat</code>.
+    </footer>
+  </main>
+</body>
+</html>

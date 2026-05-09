@@ -8,12 +8,16 @@ from .pt3 import read_pt3_h5
 from .pt3_ratio import get_pt3_ratio_data
 from .resampling import (
     ResamplingMode,
+    SampleCovarianceMode,
+    add_error_to_sample,
     apply_resampling,
     bad_point_filter,
     bin_data,
     bootstrap,
     bs_dict_avg,
     bs_ls_avg,
+    bs_ls_avg_no_corr,
+    gvar_ls_interpolate,
     jackknife,
     jk_dict_avg,
     jk_ls_avg,
@@ -21,12 +25,16 @@ from .resampling import (
 
 __all__ = [
     "ResamplingMode",
+    "SampleCovarianceMode",
+    "add_error_to_sample",
     "apply_resampling",
     "bad_point_filter",
     "bin_data",
     "bootstrap",
     "bs_dict_avg",
     "bs_ls_avg",
+    "bs_ls_avg_no_corr",
+    "gvar_ls_interpolate",
     "jackknife",
     "jk_dict_avg",
     "jk_ls_avg",

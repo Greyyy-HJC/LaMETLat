@@ -11,7 +11,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from lametlat.correlators import pt2_to_meff
-from lametlat.ground_state import pt2_re_fcn
+from lametlat.ground_state import ff_ratio_fcn, ff_sum_fcn, pt2_re_fcn
 
 from .plot_settings import (
     COLOR_CYCLE,
@@ -296,6 +296,293 @@ def pt3_ratio_plot(
         if show:
             fig_real.show()
         return (fig_real, ax_real)
+
+
+def ff_ratio_plot(
+    tau_dict: dict[int, np.ndarray],
+    ratio_real: dict[int, np.ndarray],
+    *,
+    fit_result: object | None = None,
+    fit_tsep_ls: Sequence[int] | None = None,
+    fit_tau_cut: int = 1,
+    fit_label: str = "Fit",
+    ff_sign: float = 1.0,
+    id_label: dict[str, object] | None = None,
+    save_path: str | Path | None = None,
+    show: bool = False,
+) -> tuple[Figure, Axes]:
+    """Plot form-factor ratio data with optional two-state fit bands."""
+
+    tsep_ls = sorted(ratio_real.keys())
+    if not tsep_ls:
+        raise ValueError("ratio_real must contain at least one tsep entry")
+
+    for tsep in tsep_ls:
+        if tsep not in tau_dict:
+            raise ValueError(f"tau_dict is missing tsep={tsep}")
+        if len(tau_dict[tsep]) != len(ratio_real[tsep]):
+            raise ValueError(
+                f"tau_dict[{tsep}] and ratio_real[{tsep}] must have matching lengths: "
+                f"{len(tau_dict[tsep])} != {len(ratio_real[tsep])}"
+            )
+
+    if fit_tau_cut < 0:
+        raise ValueError(f"fit_tau_cut must be non-negative, got {fit_tau_cut}")
+
+    title_prefix = ""
+    if id_label is not None:
+        title_prefix = ", ".join(f"{key} = {value}" for key, value in id_label.items())
+
+    fig, ax = default_plot()
+    y_data_ls: list[np.ndarray] = []
+    yerr_data_ls: list[np.ndarray] = []
+
+    for idx, tsep in enumerate(tsep_ls):
+        color = COLOR_CYCLE[idx % len(COLOR_CYCLE)]
+        ratio_row = np.asarray(ratio_real[tsep], dtype=object)
+        tau_center = np.asarray(tau_dict[tsep], dtype=float) - tsep / 2
+        y_mean = gv.mean(ratio_row)
+        y_sdev = gv.sdev(ratio_row)
+        ax.errorbar(
+            tau_center,
+            y_mean,
+            yerr=y_sdev,
+            label=f"{TSEP}={tsep} $a$",
+            color=color,
+            **ERRORBAR_CIRCLE_STYLE,
+        )
+        y_data_ls.append(np.asarray(y_mean, dtype=float))
+        yerr_data_ls.append(np.asarray(y_sdev, dtype=float))
+
+    if fit_result is not None:
+        fit_tseps = list(tsep_ls if fit_tsep_ls is None else fit_tsep_ls)
+        for tsep in fit_tseps:
+            if tsep not in ratio_real:
+                raise ValueError(f"fit_tsep_ls contains tsep={tsep} not present in ratio_real")
+            if 2 * fit_tau_cut > tsep:
+                raise ValueError(
+                    f"fit_tau_cut={fit_tau_cut} is too large for tsep={tsep}; "
+                    "require 2*fit_tau_cut <= tsep"
+                )
+
+            idx = tsep_ls.index(tsep)
+            color = COLOR_CYCLE[idx % len(COLOR_CYCLE)]
+            fit_tau = np.linspace(fit_tau_cut - 0.5, tsep - fit_tau_cut + 0.5, 200)
+            fit_t = np.full_like(fit_tau, float(tsep))
+            fit_ratio = ff_ratio_fcn((fit_t, fit_tau), fit_result.p)
+            fit_mean = gv.mean(fit_ratio)
+            fit_sdev = gv.sdev(fit_ratio)
+            fit_x = fit_tau - tsep / 2
+            ax.fill_between(
+                fit_x,
+                fit_mean - fit_sdev,
+                fit_mean + fit_sdev,
+                color=color,
+                alpha=0.3,
+            )
+            y_data_ls.append(np.asarray(fit_mean, dtype=float))
+            yerr_data_ls.append(np.asarray(fit_sdev, dtype=float))
+
+        ff_param = fit_result.p["ff"]
+
+        center_min = min(np.min(np.asarray(tau_dict[tsep], dtype=float) - tsep / 2) for tsep in tsep_ls)
+        center_max = max(np.max(np.asarray(tau_dict[tsep], dtype=float) - tsep / 2) for tsep in tsep_ls)
+        band_x = np.linspace(center_min, center_max, 2)
+        band_mean = np.full(2, gv.mean(ff_sign * ff_param), dtype=float)
+        band_sdev = np.full(2, gv.sdev(ff_sign * ff_param), dtype=float)
+        ax.fill_between(
+            band_x,
+            band_mean - band_sdev,
+            band_mean + band_sdev,
+            color="grey",
+            alpha=0.35,
+            label=fit_label,
+        )
+        y_data_ls.append(band_mean)
+        yerr_data_ls.append(band_sdev)
+
+    ax.set_xlabel(TAU_CENTER_LABEL, **FONT_SIZE)
+    ax.set_ylabel(RATIO_REAL_LABEL, **FONT_SIZE)
+    ax.set_ylim(auto_ylim(y_data_ls, yerr_data_ls, 2))
+    ax.legend(ncol=2, loc="upper right", **LEGEND_SIZE)
+    if title_prefix:
+        ax.set_title(title_prefix, **FONT_SIZE)
+
+    if save_path is not None:
+        path = Path(save_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(path.with_name(f"{path.name}_real.pdf"), bbox_inches="tight", transparent=True)
+    if show:
+        fig.show()
+    return fig, ax
+
+
+def ff_sum_plot(
+    tsep_ls: Sequence[int],
+    sum_real: np.ndarray | Sequence[object],
+    *,
+    fit_result: object | None = None,
+    fit_tsep_ls: Sequence[int] | None = None,
+    fit_tau_cut: int = 1,
+    fit_label: str = "Fit",
+    ff_sign: float = 1.0,
+    id_label: dict[str, object] | None = None,
+    save_path: str | Path | None = None,
+    show: bool = False,
+) -> tuple[Figure, Axes]:
+    """Plot tau-averaged form-factor sum data with optional fit bands."""
+
+    t = np.asarray(tsep_ls, dtype=int)
+    if t.ndim != 1 or t.size == 0:
+        raise ValueError("tsep_ls must be a non-empty one-dimensional sequence")
+
+    sum_arr = np.asarray(sum_real, dtype=object)
+    if sum_arr.ndim != 1:
+        raise ValueError(f"sum_real must be one-dimensional, got shape {sum_arr.shape}")
+    if len(t) != len(sum_arr):
+        raise ValueError(
+            f"tsep_ls length must match sum_real length: {len(t)} != {len(sum_arr)}"
+        )
+
+    if fit_tau_cut < 0:
+        raise ValueError(f"fit_tau_cut must be non-negative, got {fit_tau_cut}")
+
+    title_prefix = ""
+    if id_label is not None:
+        title_prefix = ", ".join(f"{key} = {value}" for key, value in id_label.items())
+
+    fig, ax = default_plot()
+    sum_mean = gv.mean(sum_arr)
+    sum_sdev = gv.sdev(sum_arr)
+    y_data_ls: list[np.ndarray] = [np.asarray(sum_mean, dtype=float)]
+    yerr_data_ls: list[np.ndarray] = [np.asarray(sum_sdev, dtype=float)]
+
+    ax.errorbar(
+        t,
+        sum_mean,
+        yerr=sum_sdev,
+        label="Data",
+        **ERRORBAR_CIRCLE_STYLE,
+    )
+
+    if fit_result is not None:
+        fit_t = np.asarray(list(t if fit_tsep_ls is None else fit_tsep_ls), dtype=float)
+        if fit_t.ndim != 1 or fit_t.size == 0:
+            raise ValueError("fit_tsep_ls must be non-empty when provided")
+        if np.any(2 * fit_tau_cut > fit_t):
+            raise ValueError(
+                "fit_tau_cut is too large for at least one fit_tsep: "
+                f"fit_tau_cut={fit_tau_cut}, fit_tsep_ls={fit_t.tolist()}"
+            )
+
+        fit_sum = ff_sum_fcn(fit_t, fit_tau_cut, fit_result.p)
+        fit_mean = gv.mean(fit_sum)
+        fit_sdev = gv.sdev(fit_sum)
+        ax.fill_between(
+            fit_t,
+            fit_mean - fit_sdev,
+            fit_mean + fit_sdev,
+            alpha=0.35,
+        )
+        y_data_ls.append(np.asarray(fit_mean, dtype=float))
+        yerr_data_ls.append(np.asarray(fit_sdev, dtype=float))
+
+        ff_param = fit_result.p["ff"]
+
+        band_x = np.linspace(float(np.min(t)), float(np.max(t)), 2)
+        band_mean = np.full(2, gv.mean(ff_sign * ff_param), dtype=float)
+        band_sdev = np.full(2, gv.sdev(ff_sign * ff_param), dtype=float)
+        ax.fill_between(
+            band_x,
+            band_mean - band_sdev,
+            band_mean + band_sdev,
+            color="grey",
+            alpha=0.35,
+            label=fit_label,
+        )
+        y_data_ls.append(band_mean)
+        yerr_data_ls.append(band_sdev)
+
+    ax.set_xlabel(TSEP_LABEL, **FONT_SIZE)
+    ax.set_ylabel(r"$\mathcal{S}(t_{\mathrm{sep}})$", **FONT_SIZE)
+    ax.set_ylim(auto_ylim(y_data_ls, yerr_data_ls, 2))
+    ax.legend(ncol=2, loc="upper right", **LEGEND_SIZE)
+    if title_prefix:
+        ax.set_title(title_prefix, **FONT_SIZE)
+
+    if save_path is not None:
+        path = Path(save_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(path.with_name(f"{path.name}_real.pdf"), bbox_inches="tight", transparent=True)
+    if show:
+        fig.show()
+    return fig, ax
+
+
+def ff_joint_plot(
+    tau_dict: dict[int, np.ndarray],
+    ratio_real: dict[int, np.ndarray],
+    *,
+    sum_tsep_ls: Sequence[int] | None = None,
+    sum_real: np.ndarray | Sequence[object] | None = None,
+    fit_result: object | None = None,
+    fit_tsep_ls: Sequence[int] | None = None,
+    fit_tau_cut: int = 1,
+    fit_label: str = "Fit",
+    ff_sign: float = 1.0,
+    id_label: dict[str, object] | None = None,
+    save_path: str | Path | None = None,
+    show: bool = False,
+) -> tuple[tuple[Figure, Axes], tuple[Figure, Axes]]:
+    """Plot ratio and tau-averaged sum panels for form-factor analyses."""
+
+    if sum_real is None:
+        inferred_tsep_ls = sorted(ratio_real.keys()) if sum_tsep_ls is None else list(sum_tsep_ls)
+        inferred_sum = []
+        for tsep in inferred_tsep_ls:
+            if tsep not in ratio_real:
+                raise ValueError(f"sum_tsep_ls contains tsep={tsep} not present in ratio_real")
+            inferred_sum.append(np.mean(np.asarray(ratio_real[tsep], dtype=object)))
+        sum_tsep_arr = np.asarray(inferred_tsep_ls, dtype=int)
+        sum_arr = np.asarray(inferred_sum, dtype=object)
+    else:
+        if sum_tsep_ls is None:
+            raise ValueError("sum_tsep_ls is required when sum_real is provided")
+        sum_tsep_arr = np.asarray(sum_tsep_ls, dtype=int)
+        sum_arr = np.asarray(sum_real, dtype=object)
+
+    ratio_save_path: str | Path | None = None
+    sum_save_path: str | Path | None = None
+    if save_path is not None:
+        base = Path(save_path)
+        ratio_save_path = base.with_name(f"{base.name}_ratio")
+        sum_save_path = base.with_name(f"{base.name}_sum")
+
+    fig_ratio, ax_ratio = ff_ratio_plot(
+        tau_dict,
+        ratio_real,
+        fit_result=fit_result,
+        fit_tsep_ls=fit_tsep_ls,
+        fit_tau_cut=fit_tau_cut,
+        fit_label=fit_label,
+        ff_sign=ff_sign,
+        id_label=id_label,
+        save_path=ratio_save_path,
+        show=show,
+    )
+    fig_sum, ax_sum = ff_sum_plot(
+        sum_tsep_arr,
+        sum_arr,
+        fit_result=fit_result,
+        fit_tsep_ls=fit_tsep_ls,
+        fit_tau_cut=fit_tau_cut,
+        fit_label=fit_label,
+        ff_sign=ff_sign,
+        id_label=id_label,
+        save_path=sum_save_path,
+        show=show,
+    )
+    return (fig_ratio, ax_ratio), (fig_sum, ax_sum)
 
 
 def qda_ratio_plot(

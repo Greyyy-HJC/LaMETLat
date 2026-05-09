@@ -4,7 +4,11 @@ import numpy as np
 import pytest
 
 from lametlat.ground_state import pt2_fit, pt2_re_fcn
-from lametlat.plotting import pt2_plot, qda_ratio_plot
+from lametlat.plotting import (
+    extrapolation_comparison_plot,
+    pt2_plot,
+    qda_ratio_plot,
+)
 
 
 def test_qda_ratio_plot_draws_real_and_imag_data():
@@ -66,3 +70,79 @@ def test_pt2_plot_draws_fit_overlay():
 
     plt.close(fig_c2)
     plt.close(fig_meff)
+
+
+def test_extrapolation_comparison_plot_draws_real_and_imag_data():
+    lam_ls = np.arange(6, dtype=float)
+    extrapolated_lam_ls = np.linspace(0, 8, 9)
+    re_gv = gv.gvar(np.cos(lam_ls / 3), np.full(len(lam_ls), 0.05))
+    im_gv = gv.gvar(np.sin(lam_ls / 3), np.full(len(lam_ls), 0.04))
+    extrapolated_re_gv = gv.gvar(
+        np.cos(extrapolated_lam_ls / 3),
+        np.full(len(extrapolated_lam_ls), 0.08),
+    )
+    extrapolated_im_gv = gv.gvar(
+        np.sin(extrapolated_lam_ls / 3),
+        np.full(len(extrapolated_lam_ls), 0.07),
+    )
+
+    (fig_real, ax_real), (fig_imag, ax_imag) = extrapolation_comparison_plot(
+        lam_ls,
+        re_gv,
+        im_gv,
+        extrapolated_lam_ls,
+        extrapolated_re_gv,
+        extrapolated_im_gv,
+        (2, 5),
+        "test",
+        ylabel_re="Real",
+        ylabel_im="Imag",
+    )
+
+    assert ax_real.get_xlabel()
+    assert ax_imag.get_xlabel()
+    assert ax_real.get_ylabel() == "Real"
+    assert ax_imag.get_ylabel() == "Imag"
+    assert ax_real.get_legend() is not None
+    assert ax_imag.get_legend() is not None
+    assert len(ax_real.lines) >= 3
+    assert len(ax_imag.lines) >= 3
+    assert len(ax_real.collections) >= 1
+    assert len(ax_imag.collections) >= 1
+
+    plt.close(fig_real)
+    plt.close(fig_imag)
+
+
+def test_extrapolation_comparison_plot_saves_real_and_imag(tmp_path):
+    lam_ls = np.arange(6, dtype=float)
+    extrapolated_lam_ls = np.linspace(0, 8, 9)
+    re_gv = gv.gvar(np.cos(lam_ls / 3), np.full(len(lam_ls), 0.05))
+    im_gv = gv.gvar(np.sin(lam_ls / 3), np.full(len(lam_ls), 0.04))
+    extrapolated_re_gv = gv.gvar(
+        np.cos(extrapolated_lam_ls / 3),
+        np.full(len(extrapolated_lam_ls), 0.08),
+    )
+    extrapolated_im_gv = gv.gvar(
+        np.sin(extrapolated_lam_ls / 3),
+        np.full(len(extrapolated_lam_ls), 0.07),
+    )
+    save_path = tmp_path / "extrapolation"
+
+    (fig_real, _), (fig_imag, _) = extrapolation_comparison_plot(
+        lam_ls,
+        re_gv,
+        im_gv,
+        extrapolated_lam_ls,
+        extrapolated_re_gv,
+        extrapolated_im_gv,
+        (2, 5),
+        "test",
+        save_path=save_path,
+    )
+
+    assert (tmp_path / "extrapolation_real.pdf").exists()
+    assert (tmp_path / "extrapolation_imag.pdf").exists()
+
+    plt.close(fig_real)
+    plt.close(fig_imag)

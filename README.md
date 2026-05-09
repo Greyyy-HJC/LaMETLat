@@ -38,6 +38,9 @@ python -m pip install -e ".[dev]"
 | `lametlat.fourier_transform` | Long-distance extrapolation and Fourier transform steps (under active development) |
 | `lametlat.perturbative_matching` | Perturbative matching (under active development) |
 
+For a browsable module/function guide with short usage snippets, see the
+[API overview](docs/api_overview.html).
+
 Machine-oriented conventions and agent guidance are summarized in [SPEC.md](SPEC.md).
 
 ## Minimal usage
@@ -54,7 +57,7 @@ Resampling helpers are imported from **`lametlat.correlators`** (same namespace 
 ## Examples
 
 - [`examples/generate_fake_data.py`](examples/generate_fake_data.py) builds small synthetic HDF5 files.
-- [`examples/full_test.py`](examples/full_test.py) runs a fuller pipeline on that fake data and writes plots under `examples/plots/`.
+- [`examples/gsfit.py`](examples/gsfit.py) plot correlators and runs a ground-state fit on the fake data.
 
 ## Development
 

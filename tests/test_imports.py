@@ -20,6 +20,7 @@ def test_core_subpackages_import():
     assert correlators.get_pt3_ratio_data is not None
     assert correlators.get_sum_data is not None
     assert correlators.get_fh_data is not None
+    assert plotting.extrapolation_comparison_plot is not None
     assert plotting.pt3_ratio_plot is not None
     assert plotting.qda_ratio_plot is not None
     assert ground_state.general_prior is not None

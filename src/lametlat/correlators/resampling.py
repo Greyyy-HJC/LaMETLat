@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Literal
 
 import gvar as gv
 import numpy as np
+from scipy.interpolate import interp1d
 
 ResamplingMode = Literal["none", "jk", "bs"]
+SampleCovarianceMode = Literal["jk", "bs"]
 
 
 def bad_point_filter(data: np.ndarray, threshold: float = 1) -> np.ndarray:
@@ -205,6 +208,41 @@ def bs_ls_avg(bs_ls: np.ndarray, axis: int = 0) -> np.ndarray:
     return out.reshape(shape[1:])
 
 
+def bs_ls_avg_no_corr(bs_ls: np.ndarray, axis: int = 0) -> np.ndarray:
+    """Average bootstrap samples into gvar values without cross-correlations.
+
+    The central value is the per-entry median across samples and the symmetric
+    error is half the 16-84 percentile range, i.e. the 1-sigma width of a
+    normal distribution. No covariance is propagated between entries.
+
+    Parameters
+    ----------
+    bs_ls:
+        Bootstrap samples.
+    axis:
+        Axis indexing independent bootstrap samples.
+
+    Returns
+    -------
+    numpy.ndarray
+        ``gvar`` array shaped like ``bs_ls`` with ``axis`` removed.
+    """
+    bs_arr = np.asarray(bs_ls)
+    assert np.isrealobj(bs_arr), "bs_ls must contain real-valued samples"
+    if axis != 0:
+        bs_arr = np.swapaxes(bs_arr, 0, axis)
+
+    shape = bs_arr.shape
+    bs_flat = bs_arr.reshape(shape[0], -1)
+
+    mid = np.median(bs_flat, axis=0)
+    p16, p84 = np.percentile(bs_flat, [16, 84], axis=0)
+    sdev = 0.5 * (p84 - p16)
+
+    out = gv.gvar(mid, sdev)
+    return out.reshape(shape[1:])
+
+
 def jk_dict_avg(data: dict[str, np.ndarray]) -> dict[str, list[gv.GVar]]:
     """Average a dict of jackknife arrays into a dict of gvar lists."""
     key_order = list(data.keys())
@@ -243,3 +281,95 @@ def bs_dict_avg(data: dict[str, np.ndarray]) -> dict[str, list[gv.GVar]]:
     for key in key_order:
         out[key] = [gv_ls.pop(0) for _ in range(lengths[key])]
     return out
+
+
+def add_error_to_sample(
+    samples: np.ndarray,
+    mode: SampleCovarianceMode = "bs",
+    *,
+    axis: int = 0,
+) -> np.ndarray:
+    """Attach the covariance from jackknife or bootstrap averages to each resample.
+
+    The covariance is taken from ``gv.evalcov`` applied to the ensemble average
+    computed by ``jk_ls_avg`` or ``bs_ls_avg``; each independent resample slice
+    is turned into a ``gvar`` array with that shared covariance structure.
+
+    Parameters
+    ----------
+    samples:
+        Jackknife or bootstrap samples (same layout as for ``jk_ls_avg`` /
+        ``bs_ls_avg``).
+    mode:
+        Use jackknife (``"jk"``) or bootstrap (``"bs"``) covariance conventions.
+    axis:
+        Axis indexing independent resamples.
+
+    Returns
+    -------
+    numpy.ndarray
+        Same shape as ``samples``; each slice along ``axis`` is a ``gvar`` array
+        built with the shared covariance from ``gv.evalcov(avg)``.
+    """
+    arr = np.asarray(samples)
+    if axis != 0:
+        arr = np.swapaxes(arr, 0, axis)
+
+    if mode == "bs":
+        avg = bs_ls_avg(arr, axis=0)
+    elif mode == "jk":
+        avg = jk_ls_avg(arr, axis=0)
+    else:
+        raise ValueError(f"unsupported sample covariance mode: {mode!r}")
+
+    cov = gv.evalcov(avg)
+    out = np.array([gv.gvar(row, cov) for row in arr])
+
+    if axis != 0:
+        out = np.swapaxes(out, 0, axis)
+    return out
+
+
+def gvar_ls_interpolate(
+    x_ls: Sequence[float] | np.ndarray,
+    gv_ls: list[gv.GVar],
+    x_ls_new: Sequence[float] | np.ndarray,
+    *,
+    n_samp: int = 100,
+    kind: str = "cubic",
+) -> np.ndarray:
+    """Interpolate ``gvar`` means and standard deviations to new coordinates.
+
+    This is an envelope interpolation: the central values and one-sigma widths
+    are interpolated independently, and the result is rebuilt with
+    :func:`gvar.gvar`. Cross-correlations from the input are not propagated.
+
+    Parameters
+    ----------
+    x_ls:
+        Original coordinates; must match ``gv_ls`` in length.
+    gv_ls:
+        Correlated ``gvar`` values at ``x_ls``.
+    x_ls_new:
+        Target coordinates (scalar or 1-d; shape of the interpolator output).
+    n_samp:
+        Retained for backward-compatible calls; not used by this implementation.
+    kind:
+        Spline order passed to :class:`scipy.interpolate.interp1d` (e.g.
+        ``"linear"``, ``"cubic"``).
+
+    Returns
+    -------
+    numpy.ndarray
+        ``gvar`` array evaluated at ``x_ls_new``, shaped like ``numpy.asarray(x_ls_new)``.
+    """
+    del n_samp
+
+    x_array = np.asarray(x_ls, dtype=float)
+    x_new = np.asarray(x_ls_new, dtype=float)
+    y_mean = np.asarray(gv.mean(gv_ls), dtype=float)
+    y_sdev = np.asarray(gv.sdev(gv_ls), dtype=float)
+
+    mean_interp = interp1d(x_array, y_mean, kind=kind)(x_new)
+    sdev_interp = interp1d(x_array, y_sdev, kind=kind)(x_new)
+    return gv.gvar(mean_interp, sdev_interp)
