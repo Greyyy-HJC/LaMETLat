@@ -73,7 +73,7 @@ def extrapolate_no_fit(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=
     )
     
     
-def extrapolate_asymptotic_proton_pdf(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200, weight_ini=0, m0=0):
+def extrapolate_asymptotic_proton_pdf(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200, weight_ini=0, m0=0, id_label=None):
     """
     Fit and extrapolate the quasi distribution at large lambda using asymptotic form, note here we need to concatenate the data points and extrapolated points together at the point fit_idx_range[0]
     
@@ -112,20 +112,20 @@ def extrapolate_asymptotic_proton_pdf(lam_ls, re_gv, im_gv, fit_idx_range, extra
 
     if fit_result_re.Q < 0.05:
         my_logger.warning(
-            f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
+            f">>> Bad extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}" + id_label
         )
     else:
         my_logger.info(
-            f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}"
+            f">>> Good extrapolation fit for real part with Q = {fit_result_re.Q:.3f}, Chi2/dof = {fit_result_re.chi2/fit_result_re.dof:.3f}, meff = {fit_result_re.p['m']:.3f}" + id_label
         )
 
     if fit_result_im.Q < 0.05:
         my_logger.warning(
-            f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
+            f">>> Bad extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}" + id_label
         )
     else:
         my_logger.info(
-            f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}"
+            f">>> Good extrapolation fit for imag part with Q = {fit_result_im.Q:.3f}, Chi2/dof = {fit_result_im.chi2/fit_result_im.dof:.3f}, meff = {fit_result_im.p['m']:.3f}" + id_label
         )
 
     # * two parts: data points and extrapolated points
@@ -148,7 +148,36 @@ def extrapolate_asymptotic_proton_pdf(lam_ls, re_gv, im_gv, fit_idx_range, extra
     num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
     
     # Calculate weights for gradual transition
-    weights = np.linspace(weight_ini, 1, num_gradual_points)
+    def logistic_weights(num_points, k=10.0):
+        """
+        Smooth S-shaped weights from 0 -> 1.
+        Args:
+            num_points (int): number of points
+            k (float): steepness parameter (larger = sharper transition)
+        """
+        x = np.linspace(0, 1, num_points)
+        w = 1 / (1 + np.exp(-k * (x - 0.5)))
+        # normalize to exactly [0, 1]
+        w = (w - w.min()) / (w.max() - w.min())
+        return w
+    
+    def power_weights(num_points, alpha=2.0):
+        """
+        Power-law weights from 0 -> 1.
+
+        Args:
+            num_points (int): number of points
+            alpha (float): shape parameter
+                        alpha > 1: slower start, faster end
+                        alpha < 1: faster start, slower end
+        """
+        x = np.linspace(0, 1, num_points)
+        w = x**alpha
+        return w
+    
+    weights = np.linspace(weight_ini, 1, num_gradual_points) # linear weights
+    # weights = logistic_weights(num_gradual_points, k=10.0) # logistic weights
+    # weights = power_weights(num_gradual_points, alpha=2.0) # power weights
     
     # Prepare lists for the weighted averages
     weighted_re = []
@@ -173,6 +202,97 @@ def extrapolate_asymptotic_proton_pdf(lam_ls, re_gv, im_gv, fit_idx_range, extra
     )
     
     
+
+def extrapolate_asymptotic_proton_pdf_joint(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200, weight_ini=0, m0=0):
+    """
+    Fit real and imag parts jointly and extrapolate the quasi distribution at large lambda
+    using asymptotic form.
+
+    check https://arxiv.org/pdf/2601.12189, Eq.(2.4)
+    """
+    exp_fcn_re = exp_asym_re_fcn(m0)
+    exp_fcn_im = exp_asym_im_fcn(m0)
+
+    lam_gap = abs(lam_ls[1] - lam_ls[0])  # the gap between two discrete lambda
+
+    lam_fit = lam_ls[fit_idx_range[0] : fit_idx_range[1]]
+    lam_dic = {"re": np.array(lam_fit), "im": np.array(lam_fit)}
+    pdf_dic = {
+        "re": re_gv[fit_idx_range[0] : fit_idx_range[1]],
+        "im": im_gv[fit_idx_range[0] : fit_idx_range[1]],
+    }
+
+    priors = exp_decay_prior()
+
+    def fcn(x, p):
+        val = {}
+        val["re"] = exp_fcn_re(x["re"], p)
+        val["im"] = exp_fcn_im(x["im"], p)
+        return val
+
+    fit_result = lsf.nonlinear_fit(
+        data=(lam_dic, pdf_dic),
+        prior=priors,
+        fcn=fcn,
+        maxit=10000,
+        svdcut=1e-100,
+        fitter="scipy_least_squares",
+    )
+
+    if fit_result.Q < 0.05:
+        my_logger.warning(
+            f">>> Bad joint extrapolation fit with Q = {fit_result.Q:.3f}, Chi2/dof = {fit_result.chi2/fit_result.dof:.3f}, meff = {fit_result.p['m']:.3f}"
+        )
+    else:
+        my_logger.info(
+            f">>> Good joint extrapolation fit with Q = {fit_result.Q:.3f}, Chi2/dof = {fit_result.chi2/fit_result.dof:.3f}, meff = {fit_result.p['m']:.3f}"
+        )
+
+    # * two parts: data points and extrapolated points
+    lam_ls_part1 = lam_ls[: fit_idx_range[0]]
+    re_gv_part1 = re_gv[: fit_idx_range[0]]
+    im_gv_part1 = im_gv[: fit_idx_range[0]]
+
+    lam_ls_part2 = np.arange(lam_ls[fit_idx_range[0]], extrapolated_length, lam_gap)
+
+    lam_dic_read = {"re": lam_ls_part2, "im": lam_ls_part2}
+    fit_val_part2 = fcn(lam_dic_read, fit_result.p)
+    re_gv_part2 = fit_val_part2["re"]
+    im_gv_part2 = fit_val_part2["im"]
+
+    # *: standardize the way to do the extrapolation
+    extrapolated_lam_ls = list(lam_ls_part1) + list(lam_ls_part2)
+    extrapolated_re_gv = list(re_gv_part1) + list(re_gv_part2)
+    extrapolated_im_gv = list(im_gv_part1) + list(im_gv_part2)
+
+    # *: Smooth the connection point
+    # Define the number of points for gradual weighting
+    num_gradual_points = fit_idx_range[1] - fit_idx_range[0]
+
+    # Calculate weights for gradual transition
+    weights = np.linspace(weight_ini, 1, num_gradual_points)
+
+    # Prepare lists for the weighted averages
+    weighted_re = []
+    weighted_im = []
+
+    for i in range(num_gradual_points):
+        w = weights[i]
+        weighted_re.append(w * re_gv_part2[i] + (1 - w) * re_gv[fit_idx_range[0] + i])
+        weighted_im.append(w * im_gv_part2[i] + (1 - w) * im_gv[fit_idx_range[0] + i])
+
+    # Combine the parts
+    extrapolated_re_gv = list(re_gv_part1) + weighted_re + list(re_gv_part2[num_gradual_points:])
+    extrapolated_im_gv = list(im_gv_part1) + weighted_im + list(im_gv_part2[num_gradual_points:])
+
+    return (
+        extrapolated_lam_ls,
+        extrapolated_re_gv,
+        extrapolated_im_gv,
+        fit_result,
+        fit_result,
+    )
+
 
 def extrapolate_exp_sin(lam_ls, re_gv, im_gv, fit_idx_range, extrapolated_length=200, weight_ini=0, m0=0):
     """
