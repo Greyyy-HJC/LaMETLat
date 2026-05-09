@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lametlat"
+version = "0.1.0"
+description = "Python tools for lattice QCD data analysis in the LaMET framework."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Jinchen He" },
+]
+dependencies = [
+    "gvar",
+    "h5py",
+    "lsqfit",
+    "matplotlib",
+    "numpy",
+    "scipy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lametlat"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.uv]
+package = true

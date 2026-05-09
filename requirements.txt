@@ -1,8 +1,0 @@
-numpy
-h5py
-matplotlib
-pandas
-scipy
-gvar
-lsqfit
-jupyter
