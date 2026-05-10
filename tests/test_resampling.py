@@ -9,6 +9,7 @@ from lametlat.correlators import (
     bootstrap,
     gvar_ls_interpolate,
     jackknife,
+    sample_ls_interpolate,
 )
 
 
@@ -93,3 +94,19 @@ def test_gvar_ls_interpolate_uses_mean_and_sdev_envelopes():
     expected_sdev = interp1d(x, sdev, kind="linear")(x_new)
     np.testing.assert_allclose(gv.mean(interpolated), expected_mean)
     np.testing.assert_allclose(gv.sdev(interpolated), expected_sdev)
+
+
+def test_sample_ls_interpolate_applies_interpolation_per_sample():
+    x = np.arange(5, dtype=float)
+    x_new = np.linspace(0, 4, 9)
+    sample_ls = np.array(
+        [
+            [0.0, 1.0, 0.5, 1.5, 1.0],
+            [1.0, 1.5, 2.0, 2.5, 3.0],
+        ]
+    )
+
+    interpolated = sample_ls_interpolate(x, sample_ls, x_new, kind="linear")
+    expected = interp1d(x, sample_ls, kind="linear", axis=1)(x_new)
+
+    np.testing.assert_allclose(interpolated, expected)

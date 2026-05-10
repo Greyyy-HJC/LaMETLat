@@ -6,6 +6,7 @@ analysis needs arise.
 """
 
 from .core import (
+    complete_z_negative,
     sum_ft,
     sum_ft_re_im,
     sum_inv_ft,
@@ -15,6 +16,7 @@ from .core import (
 )
 
 __all__ = [
+    "complete_z_negative",
     "sum_ft",
     "sum_ft_re_im",
     "sum_inv_ft",

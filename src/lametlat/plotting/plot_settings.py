@@ -11,20 +11,50 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 # Color palette.
-GREY = "#808080"
-RED = "#FF6F6F"
-PEACH = "#FF9E6F"
-ORANGE = "#FFBC6F"
-SUNKIST = "#FFDF6F"
-YELLOW = "#FFEE6F"
-LIME = "#CBF169"
-GREEN = "#5CD25C"
-TURQUOISE = "#4AAB89"
-BLUE = "#508EAD"
-GRAPE = "#635BB1"
-VIOLET = "#7C5AB8"
-FUCHSIA = "#C3559F"
-BROWN = "#6B3F3F"
+# Legacy palette (kept for reference):
+# GREY = "#808080"
+# RED = "#FF6F6F"
+# PEACH = "#FF9E6F"
+# ORANGE = "#FFBC6F"
+# SUNKIST = "#FFDF6F"
+# YELLOW = "#FFEE6F"
+# LIME = "#CBF169"
+# GREEN = "#5CD25C"
+# TURQUOISE = "#4AAB89"
+# BLUE = "#508EAD"
+# GRAPE = "#635BB1"
+# VIOLET = "#7C5AB8"
+# FUCHSIA = "#C3559F"
+# BROWN = "#6B3F3F"
+
+# Modern, publication-oriented palette (Nature-style inspired).
+GREY = "#7F7F7F"
+RED = "#D62728"
+PEACH = "#FFBE7A"
+ORANGE = "#E69F00"
+SUNKIST = "#F2C12E"
+YELLOW = "#FFD54F"
+LIME = "#B2DF8A"
+GREEN = "#2CA02C"
+TURQUOISE = "#1B9E77"
+BLUE = "#4E79A7"
+GRAPE = "#6A3D9A"
+VIOLET = "#7B6FD0"
+FUCHSIA = "#CC79A7"
+BROWN = "#8C564B"
+EMERALD = "#009E73"
+SKY = "#56B4E9"
+GOLD = "#F0E442"
+ROYAL_BLUE = "#0072B2"
+VERMILION = "#D55E00"
+SILVER = "#999999"
+OCHRE = "#A6761D"
+LEAF = "#66A61E"
+AZURE = "#1F78B4"
+CRIMSON = "#E31A1C"
+ROSE = "#FB9A99"
+LAVENDER = "#CAB2D6"
+UMBER = "#B15928"
 
 COLOR_CYCLE = [
     BLUE,
@@ -40,7 +70,21 @@ COLOR_CYCLE = [
     SUNKIST,
     YELLOW,
     BROWN,
+    EMERALD,
+    SKY,
+    GOLD,
+    ROYAL_BLUE,
+    VERMILION,
+    SILVER,
+    OCHRE,
+    LEAF,
+    AZURE,
+    CRIMSON,
+    ROSE,
+    LAVENDER,
+    UMBER,
 ]
+
 
 MARKER_CYCLE = [
     ".",
@@ -61,6 +105,12 @@ MARKER_CYCLE = [
     "4",
     "+",
     "x",
+    "h",
+    "H",
+    "d",
+    "|",
+    "_",
+    ",",
 ]
 
 FONT_CONFIG = {

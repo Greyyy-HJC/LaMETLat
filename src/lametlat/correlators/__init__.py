@@ -21,6 +21,7 @@ from .resampling import (
     jackknife,
     jk_dict_avg,
     jk_ls_avg,
+    sample_ls_interpolate,
 )
 
 __all__ = [
@@ -38,6 +39,7 @@ __all__ = [
     "jackknife",
     "jk_dict_avg",
     "jk_ls_avg",
+    "sample_ls_interpolate",
     "read_pt2_h5",
     "pt2_to_meff",
     "pt2_to_meff_solve",

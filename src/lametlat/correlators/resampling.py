@@ -335,7 +335,6 @@ def gvar_ls_interpolate(
     gv_ls: list[gv.GVar],
     x_ls_new: Sequence[float] | np.ndarray,
     *,
-    n_samp: int = 100,
     kind: str = "cubic",
 ) -> np.ndarray:
     """Interpolate ``gvar`` means and standard deviations to new coordinates.
@@ -352,8 +351,6 @@ def gvar_ls_interpolate(
         Correlated ``gvar`` values at ``x_ls``.
     x_ls_new:
         Target coordinates (scalar or 1-d; shape of the interpolator output).
-    n_samp:
-        Retained for backward-compatible calls; not used by this implementation.
     kind:
         Spline order passed to :class:`scipy.interpolate.interp1d` (e.g.
         ``"linear"``, ``"cubic"``).
@@ -363,8 +360,6 @@ def gvar_ls_interpolate(
     numpy.ndarray
         ``gvar`` array evaluated at ``x_ls_new``, shaped like ``numpy.asarray(x_ls_new)``.
     """
-    del n_samp
-
     x_array = np.asarray(x_ls, dtype=float)
     x_new = np.asarray(x_ls_new, dtype=float)
     y_mean = np.asarray(gv.mean(gv_ls), dtype=float)
@@ -373,3 +368,43 @@ def gvar_ls_interpolate(
     mean_interp = interp1d(x_array, y_mean, kind=kind)(x_new)
     sdev_interp = interp1d(x_array, y_sdev, kind=kind)(x_new)
     return gv.gvar(mean_interp, sdev_interp)
+
+
+def sample_ls_interpolate(
+    x_ls: Sequence[float] | np.ndarray,
+    sample_ls: np.ndarray,
+    x_ls_new: Sequence[float] | np.ndarray,
+    *,
+    kind: str = "cubic",
+) -> np.ndarray:
+    """Interpolate each sample in a sample list to new coordinates.
+
+    Parameters
+    ----------
+    x_ls:
+        Original coordinates; must match the length of each sample.
+    sample_ls:
+        Sample list with shape ``(n_sample, len(x_ls))``.
+    x_ls_new:
+        Target coordinates (scalar or 1-d; shape of the interpolator output).
+    kind:
+        Spline order passed to :class:`scipy.interpolate.interp1d` (e.g.
+        ``"linear"``, ``"cubic"``).
+
+    Returns
+    -------
+    numpy.ndarray
+        Interpolated sample list with shape
+        ``(n_sample, *numpy.asarray(x_ls_new).shape)``.
+    """
+    x_array = np.asarray(x_ls, dtype=float)
+    x_new = np.asarray(x_ls_new, dtype=float)
+    samples = np.asarray(sample_ls, dtype=float)
+
+    if samples.ndim != 2:
+        raise ValueError("sample_ls must be a 2-d array shaped as (n_sample, n_x)")
+    if samples.shape[1] != x_array.shape[0]:
+        raise ValueError("the length of x_ls must match sample_ls.shape[1]")
+
+    return interp1d(x_array, samples, kind=kind, axis=1)(x_new)
+

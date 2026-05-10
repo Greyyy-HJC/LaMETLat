@@ -31,12 +31,12 @@ def sum_ft(x_ls, fx_ls, output_k):
     x = np.asarray(x_ls, dtype=float)
     fx = np.asarray(fx_ls)
     fx = fx.astype(complex, copy=False)
-    delta_x = float(abs(x[1] - x[0]))
+    delta_x = abs(x[1] - x[0])
     k = np.asarray(output_k, dtype=float)
     pref = delta_x / (2 * np.pi)
 
     if k.ndim == 0:
-        phase = np.exp(1j * x * float(k))
+        phase = np.exp(1j * x * k)
         val = pref * np.dot(phase, fx)
         return val.astype(complex, copy=False)
 
@@ -62,24 +62,59 @@ def sum_ft_re_im(x_ls, fx_re_ls, fx_im_ls, output_k):
     Returns
     -------
     tuple
-        ``(Re f(k), Im f(k))`` as Python floats if ``output_k`` is scalar, else as
+        ``(Re f(k), Im f(k))`` as NumPy scalars if ``output_k`` is scalar, else as
         ``numpy.ndarray`` vectors.
     """
     x = np.asarray(x_ls, dtype=float)
     fx_re = np.asarray(fx_re_ls, dtype=float)
     fx_im = np.asarray(fx_im_ls, dtype=float)
-    delta_x = float(abs(x[1] - x[0]))
+    delta_x = abs(x[1] - x[0])
     k = np.asarray(output_k, dtype=float)
     pref = delta_x / (2 * np.pi)
     fx = fx_re + 1j * fx_im
 
     if k.ndim == 0:
-        val = pref * np.dot(np.exp(1j * x * float(k)), fx)
-        return float(val.real), float(val.imag)
+        val = pref * np.dot(np.exp(1j * x * k), fx)
+        return val.real, val.imag
 
     phase = np.exp(1j * np.multiply.outer(x, k))
     val = pref * (phase.T @ fx)
     return val.real, val.imag
+
+
+def complete_z_negative(lam_ls, re_ls, im_ls, *, im_flip_for_ft=False):
+    """Complete the ``z < 0`` branch with symmetry constraints.
+
+    Builds a symmetric grid from non-negative ``lam_ls`` (assumed to include
+    zero): real part is extended as even and imaginary part as odd. Optionally,
+    the imaginary part can be flipped first to match Fourier-transform
+    convention choices used in legacy scripts.
+
+    Parameters
+    ----------
+    lam_ls:
+        1D non-negative coordinate grid (e.g. Ioffe time ``lambda``).
+    re_ls, im_ls:
+        Real and imaginary samples on ``lam_ls``.
+    im_flip_for_ft:
+        If ``True``, apply ``im -> -im`` before odd extension.
+
+    Returns
+    -------
+    tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]
+        ``(lam_full, re_full, im_full)`` including the mirrored ``z < 0`` part.
+    """
+    lam = np.asarray(lam_ls, dtype=float)
+    re = np.asarray(re_ls, dtype=float)
+    im = np.asarray(im_ls, dtype=float)
+
+    if im_flip_for_ft:
+        im = -im
+
+    lam_full = np.concatenate([-lam[::-1][:-1], lam])
+    re_full = np.concatenate([re[::-1][:-1], re])
+    im_full = np.concatenate([-im[::-1][:-1], im])
+    return lam_full, re_full, im_full
 
 
 def sum_inv_ft(k_ls, fk_ls, output_x):
@@ -87,11 +122,11 @@ def sum_inv_ft(k_ls, fk_ls, output_x):
     k = np.asarray(k_ls, dtype=float)
     fk = np.asarray(fk_ls)
     fk = fk.astype(complex, copy=False)
-    delta_k = float(abs(k[1] - k[0]))
+    delta_k = abs(k[1] - k[0])
     x = np.asarray(output_x, dtype=float)
 
     if x.ndim == 0:
-        phase = np.exp(-1j * k * float(x))
+        phase = np.exp(-1j * k * x)
         val = delta_k * np.dot(phase, fk)
         return val.astype(complex, copy=False)
 
@@ -105,13 +140,13 @@ def sum_inv_ft_re_im(k_ls, fk_re_ls, fk_im_ls, output_x):
     k = np.asarray(k_ls, dtype=float)
     fk_re = np.asarray(fk_re_ls, dtype=float)
     fk_im = np.asarray(fk_im_ls, dtype=float)
-    delta_k = float(abs(k[1] - k[0]))
+    delta_k = abs(k[1] - k[0])
     x = np.asarray(output_x, dtype=float)
     fk = fk_re + 1j * fk_im
 
     if x.ndim == 0:
-        val = delta_k * np.dot(np.exp(-1j * k * float(x)), fk)
-        return float(val.real), float(val.imag)
+        val = delta_k * np.dot(np.exp(-1j * k * x), fk)
+        return val.real, val.imag
 
     phase = np.exp(-1j * np.multiply.outer(k, x))
     val = delta_k * (phase.T @ fk)
@@ -134,19 +169,19 @@ def two_dim_ft(bT_gev, kT, f_bdep):
 
     Returns
     -------
-    float or numpy.ndarray
+    numpy.floating or numpy.ndarray
         Transform value(s) at ``kT``.
     """
-    b = np.asarray(bT_gev, dtype=float)
-    f = np.asarray(f_bdep, dtype=float)
-    delta_bT = float(abs(b[1] - b[0]))
-    k = np.asarray(kT, dtype=float)
+    b = np.asarray(bT_gev)
+    f = np.asarray(f_bdep)
+    delta_bT = abs(b[1] - b[0])
+    k = np.asarray(kT)
     pref = delta_bT / (2 * np.pi)
     weight = b * f
 
     if k.ndim == 0:
-        out = pref * np.dot(weight, j0(float(k) * b))
-        return float(out)
+        out = pref * np.dot(weight, j0(k * b))
+        return out
 
     ker = j0(np.multiply.outer(k, b))
     out = pref * (ker @ weight)
@@ -160,14 +195,14 @@ def two_dim_inv_ft(kT_gev, bT, f_kdep):
     """
     kt = np.asarray(kT_gev, dtype=float)
     fk = np.asarray(f_kdep, dtype=float)
-    delta_kT = float(abs(kt[1] - kt[0]))
+    delta_kT = abs(kt[1] - kt[0])
     b = np.asarray(bT, dtype=float)
     pref = delta_kT * (2 * np.pi)
     weight = kt * fk
 
     if b.ndim == 0:
-        out = pref * np.dot(weight, j0(kt * float(b)))
-        return float(out)
+        out = pref * np.dot(weight, j0(kt * b))
+        return out
 
     ker = j0(np.multiply.outer(kt, b))
     out = pref * (weight @ ker)
