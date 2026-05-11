@@ -417,6 +417,7 @@
           <tr><td><code>CG_tmdwf_kernel_fixed</code>, <code>CG_tmdwf_kernel_RGR</code></td><td>Evaluate TMD wave-function kernels.</td><td><code>CG_tmdwf_kernel_RGR(x, pz_gev)</code></td></tr>
           <tr><td><code>CG_tmdpdf_kernel_fixed</code>, <code>CG_tmdpdf_kernel_RGR</code></td><td>Evaluate TMD PDF kernels.</td><td><code>CG_tmdpdf_kernel_fixed(x, pz_gev)</code></td></tr>
           <tr><td><code>CG_ff_kernel_RGR</code></td><td>Evaluate a form-factor style RG-resummed matching kernel.</td><td><code>CG_ff_kernel_RGR(x1, x2, pz_gev, mu)</code></td></tr>
+          <tr><td><code>unpolarized_matching_kernel_nlo_gT</code>, <code>unpolarized_matching_kernel_nlo_gZ</code>, <code>helicity_matching_kernel_nlo_gTg5</code>, <code>helicity_matching_kernel_nlo_gZg5</code>, <code>transversity_matching_kernel_nlo</code></td><td>Build Coulomb-gauge quasi-PDF to light-cone PDF NLO matching matrices in MSbar.</td><td><code>unpolarized_matching_kernel_nlo_gT(x, pz_gev)</code></td></tr>
           <tr><td><code>unpolarized_matching_kernel_rows_by_order</code>, <code>helicity_matching_kernel_rows_by_order</code>, <code>transversity_matching_kernel_rows</code></td><td>Build selected-row isoV small-bT kernels through N3LO from packaged ancillary references.</td><td><code>helicity_matching_kernel_rows_by_order(x, x, rows, b_fm, orders=("NLO", "NNLO", "N3LO"))</code></td></tr>
         </tbody>
       </table>

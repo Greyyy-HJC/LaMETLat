@@ -335,6 +335,7 @@ def gvar_ls_interpolate(
     gv_ls: list[gv.GVar],
     x_ls_new: Sequence[float] | np.ndarray,
     *,
+    n_samp: int | None = None,
     kind: str = "cubic",
 ) -> np.ndarray:
     """Interpolate ``gvar`` means and standard deviations to new coordinates.
@@ -351,6 +352,9 @@ def gvar_ls_interpolate(
         Correlated ``gvar`` values at ``x_ls``.
     x_ls_new:
         Target coordinates (scalar or 1-d; shape of the interpolator output).
+    n_samp:
+        Deprecated compatibility argument. Envelope interpolation is
+        deterministic and does not draw samples, so this value is ignored.
     kind:
         Spline order passed to :class:`scipy.interpolate.interp1d` (e.g.
         ``"linear"``, ``"cubic"``).
@@ -407,4 +411,3 @@ def sample_ls_interpolate(
         raise ValueError("the length of x_ls must match sample_ls.shape[1]")
 
     return interp1d(x_array, samples, kind=kind, axis=1)(x_new)
-

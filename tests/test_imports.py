@@ -1,5 +1,6 @@
 import lametlat
 from lametlat import correlators, ground_state, plotting, utils
+from lametlat import perturbative_matching
 
 
 def test_top_level_import():
@@ -38,3 +39,6 @@ def test_core_subpackages_import():
     assert ground_state.ff_ratio_two_state_fit is not None
     assert ground_state.ff_sum_two_state_fit is not None
     assert ground_state.ff_joint_two_state_fit is not None
+    assert perturbative_matching.CG_tmd_kernel_RGR is not None
+    assert perturbative_matching.unpolarized_matching_kernel_nlo_gT is not None
+    assert perturbative_matching.transversity_matching_kernel_nlo is not None
