@@ -28,11 +28,11 @@ def sum_ft(x_ls, fx_ls, output_k):
     complex or numpy.ndarray
         ``f(k)`` with dtype ``complex128``. Scalar ``k`` yields a scalar numpy complex.
     """
-    x = np.asarray(x_ls, dtype=float)
+    x = np.asarray(x_ls)
     fx = np.asarray(fx_ls)
     fx = fx.astype(complex, copy=False)
     delta_x = abs(x[1] - x[0])
-    k = np.asarray(output_k, dtype=float)
+    k = np.asarray(output_k)
     pref = delta_x / (2 * np.pi)
 
     if k.ndim == 0:
@@ -65,21 +65,31 @@ def sum_ft_re_im(x_ls, fx_re_ls, fx_im_ls, output_k):
         ``(Re f(k), Im f(k))`` as NumPy scalars if ``output_k`` is scalar, else as
         ``numpy.ndarray`` vectors.
     """
-    x = np.asarray(x_ls, dtype=float)
-    fx_re = np.asarray(fx_re_ls, dtype=float)
-    fx_im = np.asarray(fx_im_ls, dtype=float)
+    x = np.asarray(x_ls)
+    fx_re = np.asarray(fx_re_ls)
+    fx_im = np.asarray(fx_im_ls)
     delta_x = abs(x[1] - x[0])
-    k = np.asarray(output_k, dtype=float)
+    k = np.asarray(output_k)
     pref = delta_x / (2 * np.pi)
-    fx = fx_re + 1j * fx_im
 
     if k.ndim == 0:
-        val = pref * np.dot(np.exp(1j * x * k), fx)
-        return val.real, val.imag
+        phase = x * k
+        cos_phase = np.cos(phase)
+        sin_phase = np.sin(phase)
+        val_re = pref * np.sum(cos_phase * fx_re) - pref * np.sum(sin_phase * fx_im)
+        val_im = pref * np.sum(sin_phase * fx_re) + pref * np.sum(cos_phase * fx_im)
+        return val_re, val_im
 
-    phase = np.exp(1j * np.multiply.outer(x, k))
-    val = pref * (phase.T @ fx)
-    return val.real, val.imag
+    phase = np.multiply.outer(x, k)
+    cos_phase = np.cos(phase)
+    sin_phase = np.sin(phase)
+    val_re = pref * np.sum(cos_phase * fx_re[:, None], axis=0) - pref * np.sum(
+        sin_phase * fx_im[:, None], axis=0
+    )
+    val_im = pref * np.sum(sin_phase * fx_re[:, None], axis=0) + pref * np.sum(
+        cos_phase * fx_im[:, None], axis=0
+    )
+    return val_re, val_im
 
 
 def complete_z_negative(lam_ls, re_ls, im_ls, *, im_flip_for_ft=False):
@@ -104,9 +114,9 @@ def complete_z_negative(lam_ls, re_ls, im_ls, *, im_flip_for_ft=False):
     tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]
         ``(lam_full, re_full, im_full)`` including the mirrored ``z < 0`` part.
     """
-    lam = np.asarray(lam_ls, dtype=float)
-    re = np.asarray(re_ls, dtype=float)
-    im = np.asarray(im_ls, dtype=float)
+    lam = np.asarray(lam_ls)
+    re = np.asarray(re_ls)
+    im = np.asarray(im_ls)
 
     if im_flip_for_ft:
         im = -im
@@ -119,11 +129,11 @@ def complete_z_negative(lam_ls, re_ls, im_ls, *, im_flip_for_ft=False):
 
 def sum_inv_ft(k_ls, fk_ls, output_x):
     """Inverse transform ``f(k) → f(x)``: ``Δk Σ_k exp(-i k x) f(k)``."""
-    k = np.asarray(k_ls, dtype=float)
+    k = np.asarray(k_ls)
     fk = np.asarray(fk_ls)
     fk = fk.astype(complex, copy=False)
     delta_k = abs(k[1] - k[0])
-    x = np.asarray(output_x, dtype=float)
+    x = np.asarray(output_x)
 
     if x.ndim == 0:
         phase = np.exp(-1j * k * x)
@@ -137,20 +147,30 @@ def sum_inv_ft(k_ls, fk_ls, output_x):
 
 def sum_inv_ft_re_im(k_ls, fk_re_ls, fk_im_ls, output_x):
     """Inverse transform with real and imaginary parts of ``f(k)`` separated."""
-    k = np.asarray(k_ls, dtype=float)
-    fk_re = np.asarray(fk_re_ls, dtype=float)
-    fk_im = np.asarray(fk_im_ls, dtype=float)
+    k = np.asarray(k_ls)
+    fk_re = np.asarray(fk_re_ls)
+    fk_im = np.asarray(fk_im_ls)
     delta_k = abs(k[1] - k[0])
-    x = np.asarray(output_x, dtype=float)
-    fk = fk_re + 1j * fk_im
+    x = np.asarray(output_x)
 
     if x.ndim == 0:
-        val = delta_k * np.dot(np.exp(-1j * k * x), fk)
-        return val.real, val.imag
+        phase = k * x
+        cos_phase = np.cos(phase)
+        sin_phase = np.sin(phase)
+        val_re = delta_k * np.sum(cos_phase * fk_re) + delta_k * np.sum(sin_phase * fk_im)
+        val_im = delta_k * np.sum(cos_phase * fk_im) - delta_k * np.sum(sin_phase * fk_re)
+        return val_re, val_im
 
-    phase = np.exp(-1j * np.multiply.outer(k, x))
-    val = delta_k * (phase.T @ fk)
-    return val.real, val.imag
+    phase = np.multiply.outer(k, x)
+    cos_phase = np.cos(phase)
+    sin_phase = np.sin(phase)
+    val_re = delta_k * np.sum(cos_phase * fk_re[:, None], axis=0) + delta_k * np.sum(
+        sin_phase * fk_im[:, None], axis=0
+    )
+    val_im = delta_k * np.sum(cos_phase * fk_im[:, None], axis=0) - delta_k * np.sum(
+        sin_phase * fk_re[:, None], axis=0
+    )
+    return val_re, val_im
 
 
 def two_dim_ft(bT_gev, kT, f_bdep):
@@ -193,10 +213,10 @@ def two_dim_inv_ft(kT_gev, bT, f_kdep):
 
     Computes ``Δ k_T (2π) Σ_{k_T} k_T f(k_T) J₀(k_T b_T)``.
     """
-    kt = np.asarray(kT_gev, dtype=float)
-    fk = np.asarray(f_kdep, dtype=float)
+    kt = np.asarray(kT_gev)
+    fk = np.asarray(f_kdep)
     delta_kT = abs(kt[1] - kt[0])
-    b = np.asarray(bT, dtype=float)
+    b = np.asarray(bT)
     pref = delta_kT * (2 * np.pi)
     weight = kt * fk
 

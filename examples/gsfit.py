@@ -29,14 +29,14 @@ LT = 32
 N_BOOT = 96
 BOOT_SEED = 1984
 TSEP_FILES = {
-    4: "data/fake_pt3_tsep4.h5",
-    6: "data/fake_pt3_tsep6.h5",
-    8: "data/fake_pt3_tsep8.h5",
-    10: "data/fake_pt3_tsep10.h5",
+    4: "data/fake_qtmdpdf_3pt_ts4.h5",
+    6: "data/fake_qtmdpdf_3pt_ts6.h5",
+    8: "data/fake_qtmdpdf_3pt_ts8.h5",
+    10: "data/fake_qtmdpdf_3pt_ts10.h5",
 }
 
 pt2 = read_pt2_h5(
-    "data/fake_pt2.h5",
+    "data/fake_2pt.h5",
     source_sink="SS",
     gamma="5",
     momentum="PX0PY0PZ0",
@@ -45,7 +45,7 @@ pt2 = read_pt2_h5(
     seed=BOOT_SEED,
 )
 qda = read_qda_h5(
-    "data/fake_qda.h5",
+    "data/fake_qtmdwf.h5",
     bT="bT0",
     bz="bz0",
     resampling="bs",

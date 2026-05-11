@@ -39,6 +39,7 @@ htmlcov/
 *.npz
 plots/
 cache/
+examples/data/
 
 # OS/editor
 .DS_Store
