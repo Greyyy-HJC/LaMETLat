@@ -56,8 +56,17 @@ Resampling helpers are imported from **`lametlat.correlators`** (same namespace 
 
 ## Examples
 
-- [`examples/generate_fake_data.py`](examples/generate_fake_data.py) builds small synthetic HDF5 files.
-- [`examples/gsfit.py`](examples/gsfit.py) plot correlators and runs a ground-state fit on the fake data.
+Example data files are generated locally and are not tracked in git. To build
+the fake qTMD dataset used by the examples, run:
+
+```bash
+python examples/generate_fake_data.py
+```
+
+This writes ignored files under `examples/data/`, including `fake_2pt.h5`,
+`fake_qtmdwf.h5`, `fake_qtmdpdf_3pt_ts{4,6,8,10}.h5`, and
+`fake_soft_function.npy`. The generator also runs shape checks for the
+fixed `z`, `b`, and `tsep` layouts.
 
 ## Development
 
