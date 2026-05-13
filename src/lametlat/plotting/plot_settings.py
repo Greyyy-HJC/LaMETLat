@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import numpy as np
 from matplotlib import rcParams
 from matplotlib.axes import Axes
@@ -85,6 +86,19 @@ COLOR_CYCLE = [
     UMBER,
 ]
 
+def darken_color(color, factor=0.65):
+    """
+    Darken a hex color by multiplying RGB channels with factor.
+    factor < 1 => darker
+    """
+    rgb = mcolors.to_rgb(color)
+    dark_rgb = tuple(max(min(c * factor, 1), 0) for c in rgb)
+    return mcolors.to_hex(dark_rgb)
+
+EDGE_COLOR_CYCLE = [
+    darken_color(c, factor=0.55)
+    for c in COLOR_CYCLE
+]
 
 MARKER_CYCLE = [
     ".",
