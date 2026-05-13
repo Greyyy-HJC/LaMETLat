@@ -1,6 +1,9 @@
 """Small-bT TMDPDF matching kernels for collinear PDFs.
 
-The N3LO unpolarized and helicity kernels are evaluated from the numerical
+This module is specialized for the current DWF analysis convention: positive-x,
+quark-only isovector PDFs, i.e. u - d without explicit antiquark input.
+
+The N3LO unpolarized and helicity kernels are evaluated from numerical
 ancillary expressions distributed with arXiv:2012.03256 and arXiv:2509.01655.
 The transversity logarithmic structure follows arXiv:2509.17568, with the
 transversity splitting kernels read from its ``tPS["qq"]`` ancillary expression.
@@ -391,13 +394,24 @@ def _reference_file(filename: str) -> Path:
 def _channel_distribution_coeff(kind: str, x: float, Lp: float, Lh: float, Nf: int, power: int):
     if kind == "unpolarized":
         path = _reference_file("2012.03256_TMDPDFN.m")
+        # Quark-only isovector channel:
+        #   C_{u-d} = C_{q<-q} - C_{q<-q'}
+        # The antiquark channels qqb/qqbp are not included for the present
+        # positive-x quark PDF input.
         return (
             _distribution_coeff(path, "TMDpdfN", "qq", x, Lp, Lh, Nf, power)
             - _distribution_coeff(path, "TMDpdfN", "qqp", x, Lp, Lh, Nf, power)
         )
     if kind == "helicity":
         path = _reference_file("2509.01655_dPDFMSbN.m")
-        return _distribution_coeff(path, "dPDFMSbN", "+", x, Lp, Lh, Nf, power)
+        # The helicity ancillary file provides nonsinglet channels
+        #   ns+ = qq^v + q qbar^v,  ns- = qq^v - q qbar^v.
+        # For a quark-only isovector PDF we need qq^v, hence
+        #   qq^v = (ns+ + ns-) / 2.
+        return 0.5 * (
+            _distribution_coeff(path, "dPDFMSbN", "+", x, Lp, Lh, Nf, power)
+            + _distribution_coeff(path, "dPDFMSbN", "-", x, Lp, Lh, Nf, power)
+        )
     raise ValueError(f"Unsupported ancillary channel kind: {kind}")
 
 
@@ -521,6 +535,9 @@ def _trans_tps_path() -> Path:
 
 
 def _trans_splitting_distribution(power: int, x: float, Nf: int):
+    # Transversity is taken in the positive-x quark channel tPS["qq"].
+    # The q<-qbar channel tPS["qqb"] is not part of the current quark-only
+    # isovector PDF convention.
     return _distribution_coeff(_trans_tps_path(), "tPS", "qq", x, 0.0, 0.0, Nf, power)
 
 
