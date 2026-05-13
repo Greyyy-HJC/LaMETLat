@@ -4,6 +4,15 @@ import numpy as np
 import gvar as gv
 
 
+def fit_parts(part: str) -> tuple[str, ...]:
+    """Return selected real/imaginary fit channels."""
+    if part == "both":
+        return ("re", "im")
+    if part in {"re", "im"}:
+        return (part,)
+    raise ValueError("part must be 're', 'im', or 'both'")
+
+
 def _validate_nstate(nstate: int) -> None:
     if isinstance(nstate, bool) or not isinstance(nstate, int) or nstate < 1:
         raise ValueError("nstate must be a positive integer")
@@ -313,4 +322,3 @@ def ff_sum_fcn(
         return _ff_sum_avg_at_t(float(t_arr.item()), tau_cut, p)
     stacked = [_ff_sum_avg_at_t(float(tv), tau_cut, p) for tv in t_arr.ravel()]
     return np.asarray(stacked).reshape(t_arr.shape)
-

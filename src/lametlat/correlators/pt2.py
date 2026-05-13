@@ -153,24 +153,13 @@ def _read_momentum_group(
 def _normalize_by_t0_sample_mean(data: np.ndarray) -> np.ndarray:
     """Normalize a sample-first 2pt array by the sample mean at t=0."""
     arr = np.asarray(data)
-    if arr.ndim != 2:
-        raise ValueError(f"pt2 data must be a 2D array, got shape {arr.shape}")
-
     norm = np.mean(arr[:, 0])
-    if norm == 0:
-        raise ZeroDivisionError("sample mean at t=0 is zero")
     return arr / norm
 
 
 def pt2_to_meff(pt2_array: np.ndarray, boundary: str = "periodic") -> np.ndarray:
     """Convert a 1D 2pt correlator to effective-mass values."""
     data = np.asarray(pt2_array)
-    if data.ndim != 1:
-        raise ValueError(f"pt2_to_meff expects a 1D array, got shape {data.shape}")
-    if data.size < 3 and boundary in {"periodic", "anti-periodic"}:
-        raise ValueError("pt2_array must have at least 3 points for periodic/anti-periodic")
-    if data.size < 2 and boundary == "none":
-        raise ValueError("pt2_array must have at least 2 points for boundary='none'")
 
     if boundary == "periodic":
         return np.arccosh((data[2:] + data[:-2]) / (2 * data[1:-1]))
@@ -186,10 +175,6 @@ def pt2_to_meff(pt2_array: np.ndarray, boundary: str = "periodic") -> np.ndarray
 def pt2_to_meff_solve(pt2_array: np.ndarray, boundary: str = "periodic") -> np.ndarray:
     """Convert a 1D 2pt correlator to effective mass by solving the ratio equation."""
     data = np.asarray(pt2_array)
-    if data.ndim != 1:
-        raise ValueError(f"pt2_to_meff_solve expects a 1D array, got shape {data.shape}")
-    if data.size < 2:
-        raise ValueError("pt2_array must have at least 2 points")
     if boundary == "none":
         return np.log(data[:-1] / data[1:])
 

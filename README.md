@@ -63,8 +63,8 @@ the fake qTMD dataset used by the examples, run:
 python examples/generate_fake_data.py
 ```
 
-This writes ignored files under `examples/data/`, including `fake_2pt.h5`,
-`fake_qtmdwf.h5`, `fake_qtmdpdf_3pt_ts{4,6,8,10}.h5`, and
+This writes ignored files under `examples/data/`, including `fake_pt2.h5`,
+`fake_qda.h5`, `fake_pt3_tsep{4,6,8,10}.h5`, and
 `fake_soft_function.npy`. The generator also runs shape checks for the
 fixed `z`, `b`, and `tsep` layouts.
 

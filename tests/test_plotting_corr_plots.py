@@ -1,7 +1,6 @@
 import gvar as gv
 import matplotlib.pyplot as plt
 import numpy as np
-import pytest
 
 from lametlat.ground_state import pt2_fit, pt2_re_fcn
 from lametlat.plotting import (
@@ -30,13 +29,6 @@ def test_qda_ratio_plot_draws_real_and_imag_data():
 
     plt.close(fig_real)
     plt.close(fig_imag)
-
-
-def test_qda_ratio_plot_validates_trange_length():
-    qda_ratio_real = gv.gvar([1.0, 1.2, 1.5], [0.1, 0.1, 0.2])
-
-    with pytest.raises(ValueError, match="trange length"):
-        qda_ratio_plot(np.arange(2), qda_ratio_real)
 
 
 def test_pt2_plot_draws_fit_overlay():

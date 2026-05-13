@@ -208,7 +208,7 @@ def bs_ls_avg(bs_ls: np.ndarray, axis: int = 0) -> np.ndarray:
     return out.reshape(shape[1:])
 
 
-def bs_ls_avg_no_corr(bs_ls: np.ndarray, axis: int = 0) -> np.ndarray:
+def bs_ls_avg_percentile(bs_ls: np.ndarray, axis: int = 0) -> np.ndarray:
     """Average bootstrap samples into gvar values without cross-correlations.
 
     The central value is the per-entry median across samples and the symmetric
