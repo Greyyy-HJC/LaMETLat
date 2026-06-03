@@ -32,6 +32,7 @@ from .plot_settings import (
     MEFF_LABEL,
     RATIO_IMAG_LABEL,
     RATIO_REAL_LABEL,
+    RATIO_FF_LABEL,
     TAU_CENTER_LABEL,
     TSEP,
     TSEP_LABEL,
@@ -490,7 +491,7 @@ def ff_ratio_plot(
         yerr_data_ls.append(band_sdev)
 
     ax.set_xlabel(TAU_CENTER_LABEL, **FONT_SIZE)
-    ax.set_ylabel(RATIO_REAL_LABEL, **FONT_SIZE)
+    ax.set_ylabel(RATIO_FF_LABEL, **FONT_SIZE)
     ax.set_ylim(auto_ylim(y_data_ls, yerr_data_ls, 2))
     ax.legend(ncol=2, loc="upper right", **LEGEND_SIZE)
     if title_prefix:

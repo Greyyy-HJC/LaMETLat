@@ -139,8 +139,12 @@ FIG_SIZE = (FIG_WIDTH, FIG_WIDTH / GOLDEN_RATIO)
 
 PLOT_AXES = [0.15, 0.15, 0.8, 0.8]
 FONT_SIZE = {"fontsize": 18}
-LEGEND_SIZE = {"fontsize": 14}
 LABEL_SIZE = {"labelsize": 18}
+LEGEND_SIZE = {"fontsize": 14}
+
+FONT_SIZE_LG = {"fontsize": 20}
+LABEL_SIZE_LG = {"labelsize": 20}
+LEGEND_SIZE_LG = {"fontsize": 18}
 
 ERRORBAR_STYLE = {
     "markersize": 5,
@@ -172,6 +176,7 @@ MEFF_LABEL = r"${m}_{\mathrm{eff}}$"
 RATIO_REAL_LABEL = r"$\Re\left[\mathcal{R}(t_{\mathrm{sep}},\tau)\right]$"
 RATIO_IMAG_LABEL = r"$\Im\left[\mathcal{R}(t_{\mathrm{sep}},\tau)\right]$"
 
+RATIO_FF_LABEL = r"$\mathcal{R}_F(t_{\mathrm{sep}},\tau)$"
 
 def apply_plot_style() -> None:
     """Apply package default font settings to matplotlib rcParams."""
