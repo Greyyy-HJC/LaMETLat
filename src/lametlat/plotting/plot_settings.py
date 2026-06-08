@@ -173,10 +173,10 @@ Z_LABEL = r"${z~/~a}$"
 LAMBDA_LABEL = r"$\lambda = z P^z$"
 MEFF_LABEL = r"${m}_{\mathrm{eff}}$"
 
-RATIO_REAL_LABEL = r"$\Re\left[\mathcal{R}(t_{\mathrm{sep}},\tau)\right]$"
-RATIO_IMAG_LABEL = r"$\Im\left[\mathcal{R}(t_{\mathrm{sep}},\tau)\right]$"
+RATIO_REAL_LABEL = r"$\Re\left[R(t_{\mathrm{sep}},\tau)\right]$"
+RATIO_IMAG_LABEL = r"$\Im\left[R(t_{\mathrm{sep}},\tau)\right]$"
 
-RATIO_FF_LABEL = r"$\mathcal{R}_F(t_{\mathrm{sep}},\tau)$"
+RATIO_FF_LABEL = r"$\tilde{R}_F(t_{\mathrm{sep}},\tau)$"
 
 def apply_plot_style() -> None:
     """Apply package default font settings to matplotlib rcParams."""
