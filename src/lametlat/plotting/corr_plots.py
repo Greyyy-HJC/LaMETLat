@@ -226,6 +226,16 @@ def pt2_plot(
     return (fig_c2, ax_c2), (fig_meff, ax_meff)
 
 
+def _pt3_ratio_denominator_correction(
+    tsep: int,
+    *,
+    energy: gv.GVar | float,
+    Lt: int,
+) -> gv.GVar | float:
+    """Convert C3/C2_periodic ratios to a forward-denominator convention."""
+    return 1.0 + gv.exp(-energy * (float(int(Lt)) - 2.0 * float(int(tsep))))
+
+
 def pt3_ratio_plot(
     tau_dict: dict[int, np.ndarray],
     ratio_real: dict[int, np.ndarray],
@@ -239,18 +249,31 @@ def pt3_ratio_plot(
     save_path: str | Path | None = None,
     show: bool = False,
 ) -> tuple[Figure, Axes]:
-    """Plot 3pt ratio vs tau for each tsep from precomputed arrays."""
-    
+    """Plot 3pt ratio vs tau for each tsep from precomputed arrays.
+
+    When a fit result is supplied, the plotted ratio data and fit bands are
+    converted from the periodic-denominator convention to the forward-only
+    ground-state denominator convention, so the grey band is ``O00/(2E0)``.
+    """
+
     tsep_ls = sorted(ratio_real.keys())
     fit_lt = max(tsep_ls) + 1 if Lt is None else Lt
     nstate = 2 if fit_result is None else _fit_nstate(fit_result)
+    correction_energy = None if fit_result is None else fit_result.p["E0"]
     
     fig_real, ax_real = default_plot()
     y_data_re: list[np.ndarray] = []
     yerr_re: list[np.ndarray] = []
     for tsep in tsep_ls:
-        y_mean = gv.mean(ratio_real[tsep])
-        y_sdev = gv.sdev(ratio_real[tsep])
+        ratio_row = ratio_real[tsep]
+        if correction_energy is not None:
+            ratio_row = ratio_row * _pt3_ratio_denominator_correction( #! without this, the ratio at tsep -> inf will not converge to matrix_element
+                int(tsep),
+                energy=correction_energy,
+                Lt=fit_lt,
+            )
+        y_mean = gv.mean(ratio_row)
+        y_sdev = gv.sdev(ratio_row)
         ax_real.errorbar(
             tau_dict[tsep] - tsep / 2,
             y_mean,
@@ -269,6 +292,11 @@ def pt3_ratio_plot(
             fit_tau = np.linspace(fit_tau_cut - 0.5, tsep - fit_tau_cut + 0.5, 200)
             fit_t = np.full_like(fit_tau, float(tsep))
             fit_ratio = pt3_ratio_re_fcn(fit_t, fit_tau, fit_result.p, fit_lt, nstate=nstate)
+            fit_ratio = fit_ratio * _pt3_ratio_denominator_correction(
+                int(tsep),
+                energy=correction_energy,
+                Lt=fit_lt,
+            )
             fit_mean = gv.mean(fit_ratio)
             fit_sdev = gv.sdev(fit_ratio)
             fit_x = fit_tau - tsep / 2
@@ -315,8 +343,15 @@ def pt3_ratio_plot(
         y_data_im: list[np.ndarray] = []
         yerr_im: list[np.ndarray] = []
         for tsep in tsep_ls:
-            y_mean = gv.mean(ratio_imag[tsep])
-            y_sdev = gv.sdev(ratio_imag[tsep])
+            ratio_row = ratio_imag[tsep]
+            if correction_energy is not None:
+                ratio_row = ratio_row * _pt3_ratio_denominator_correction(
+                    int(tsep),
+                    energy=correction_energy,
+                    Lt=fit_lt,
+                )
+            y_mean = gv.mean(ratio_row)
+            y_sdev = gv.sdev(ratio_row)
             ax_imag.errorbar(
                 tau_dict[tsep] - tsep / 2,
                 y_mean,
@@ -335,6 +370,11 @@ def pt3_ratio_plot(
                 fit_tau = np.linspace(fit_tau_cut - 0.5, tsep - fit_tau_cut + 0.5, 200)
                 fit_t = np.full_like(fit_tau, float(tsep))
                 fit_ratio = pt3_ratio_im_fcn(fit_t, fit_tau, fit_result.p, fit_lt, nstate=nstate)
+                fit_ratio = fit_ratio * _pt3_ratio_denominator_correction(
+                    int(tsep),
+                    energy=correction_energy,
+                    Lt=fit_lt,
+                )
                 fit_mean = gv.mean(fit_ratio)
                 fit_sdev = gv.sdev(fit_ratio)
                 fit_x = fit_tau - tsep / 2

@@ -1,11 +1,13 @@
 import gvar as gv
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
 
 from lametlat.ground_state import pt2_fit, pt2_re_fcn
 from lametlat.plotting import (
     extrapolation_comparison_plot,
     pt2_plot,
+    pt3_ratio_plot,
     qda_ratio_plot,
 )
 
@@ -29,6 +31,38 @@ def test_qda_ratio_plot_draws_real_and_imag_data():
 
     plt.close(fig_real)
     plt.close(fig_imag)
+
+
+def test_pt3_ratio_plot_corrects_periodic_denominator_data():
+    class Fit:
+        pass
+
+    fit = Fit()
+    fit.p = gv.BufferDict()
+    fit.p["E0"] = gv.gvar(0.1, 0.0)
+    fit.p["z0"] = gv.gvar(1.0, 0.0)
+    fit.p["O00_re"] = gv.gvar(0.2, 0.0)
+
+    tsep = 8
+    Lt = 32
+    tau_dict = {tsep: np.arange(1, tsep, dtype=float)}
+    ratio_real = {tsep: gv.gvar(np.ones(tsep - 1), np.full(tsep - 1, 0.01))}
+
+    fig, ax = pt3_ratio_plot(
+        tau_dict,
+        ratio_real,
+        fit_result=fit,
+        fit_tsep_ls=[tsep],
+        fit_tau_cut=1,
+        Lt=Lt,
+    )
+
+    expected = 1.0 + np.exp(-0.1 * (Lt - 2 * tsep))
+    assert np.asarray(ax.lines[0].get_ydata(), dtype=float) == pytest.approx(
+        np.full(tsep - 1, expected)
+    )
+
+    plt.close(fig)
 
 
 def test_pt2_plot_draws_fit_overlay():
