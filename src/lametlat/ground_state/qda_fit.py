@@ -48,7 +48,7 @@ def _update_prior_from_pt2_fit(
 
 def qda_fit(
     qda_real: np.ndarray,
-    qda_imag: np.ndarray,
+    qda_imag: np.ndarray | None,
     tmin: int,
     tmax: int,
     Lt: int,
@@ -61,9 +61,11 @@ def qda_fit(
     p0: dict | None = None,
     part: str = "both",
 ) -> lsf.nonlinear_fit:
-    """Fit real and imaginary qDA/TMDWF correlators with an n-state ansatz."""
+    """Fit qDA/TMDWF correlators, omitting the imaginary part when it is None."""
 
     parts = fit_parts(part)
+    if qda_imag is None:
+        parts = ("re",)
     priors = _qda_prior(nstate=nstate) if prior is None else prior
     if pt2_fit_res is not None:
         _update_prior_from_pt2_fit(priors, pt2_fit_res, nstate)
@@ -71,15 +73,15 @@ def qda_fit(
     fit_t = np.arange(tmin, tmax, dtype=int)
     all_fit_data = {
         "re": np.asarray(qda_real, dtype=object)[fit_t],
-        "im": np.asarray(qda_imag, dtype=object)[fit_t],
     }
+    if qda_imag is not None:
+        all_fit_data["im"] = np.asarray(qda_imag, dtype=object)[fit_t]
     fit_data = {key: all_fit_data[key] for key in parts}
 
     def fcn(t: np.ndarray, p: dict) -> dict[str, np.ndarray]:
-        values = {
-            "re": qda_re_fcn(t, p, Lt, nstate=nstate),
-            "im": qda_im_fcn(t, p, Lt, nstate=nstate),
-        }
+        values = {"re": qda_re_fcn(t, p, Lt, nstate=nstate)}
+        if qda_imag is not None:
+            values["im"] = qda_im_fcn(t, p, Lt, nstate=nstate)
         return {key: values[key] for key in parts}
 
     fit_res = lsf.nonlinear_fit(
@@ -97,7 +99,7 @@ def qda_fit(
 
 def qda_two_state_fit(
     qda_real: np.ndarray,
-    qda_imag: np.ndarray,
+    qda_imag: np.ndarray | None,
     tmin: int,
     tmax: int,
     Lt: int,
@@ -130,7 +132,7 @@ def qda_two_state_fit(
 def qda_joint_fit(
     pt2_avg: np.ndarray,
     qda_real: np.ndarray,
-    qda_imag: np.ndarray,
+    qda_imag: np.ndarray | None,
     pt2_trange: Sequence[int],
     qda_trange: Sequence[int],
     Lt: int,
@@ -143,9 +145,11 @@ def qda_joint_fit(
     svdcut: float | None = 1e-6,
     part: str = "both",
 ) -> lsf.nonlinear_fit:
-    """Joint fit of two-point and qDA/TMDWF correlators."""
+    """Joint fit of two-point and qDA, omitting the imaginary part when None."""
 
     parts = fit_parts(part)
+    if qda_imag is None:
+        parts = ("re",)
     priors = _qda_prior(nstate=nstate) if prior is None else prior
     pt2_t = np.asarray(pt2_trange, dtype=int)
     qda_t = np.asarray(qda_trange, dtype=int)
@@ -153,8 +157,9 @@ def qda_joint_fit(
     all_fit_data = {
         "pt2": np.asarray(pt2_avg, dtype=object)[pt2_t],
         "re": np.asarray(qda_real, dtype=object)[qda_t],
-        "im": np.asarray(qda_imag, dtype=object)[qda_t],
     }
+    if qda_imag is not None:
+        all_fit_data["im"] = np.asarray(qda_imag, dtype=object)[qda_t]
     fit_data = {"pt2": all_fit_data["pt2"]}
     fit_data.update({key: all_fit_data[key] for key in parts})
 
@@ -163,8 +168,9 @@ def qda_joint_fit(
         values = {
             "pt2": pt2_re_fcn(pt2_x, p, Lt, nstate=nstate),
             "re": qda_re_fcn(qda_x, p, Lt, nstate=nstate),
-            "im": qda_im_fcn(qda_x, p, Lt, nstate=nstate),
         }
+        if qda_imag is not None:
+            values["im"] = qda_im_fcn(qda_x, p, Lt, nstate=nstate)
         out = {"pt2": values["pt2"]}
         out.update({key: values[key] for key in parts})
         return out
@@ -186,7 +192,7 @@ def qda_joint_fit(
 def qda_two_state_joint_fit(
     pt2_avg: np.ndarray,
     qda_real: np.ndarray,
-    qda_imag: np.ndarray,
+    qda_imag: np.ndarray | None,
     pt2_trange: Sequence[int],
     qda_trange: Sequence[int],
     Lt: int,

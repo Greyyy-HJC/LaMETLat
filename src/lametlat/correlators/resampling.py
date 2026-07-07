@@ -330,6 +330,97 @@ def add_error_to_sample(
     return out
 
 
+def add_error_to_sample_percentile(
+    samples: np.ndarray,
+    mode: SampleCovarianceMode = "bs",
+    *,
+    axis: int = 0,
+) -> np.ndarray:
+    """Attach the covariance from jackknife or bootstrap averages to each resample.
+
+    The covariance is taken from ``gv.evalcov`` applied to the ensemble average
+    computed by ``jk_ls_avg`` or ``bs_ls_avg``; each independent resample slice
+    is turned into a ``gvar`` array with that shared covariance structure.
+
+    Parameters
+    ----------
+    samples:
+        Jackknife or bootstrap samples (same layout as for ``jk_ls_avg`` /
+        ``bs_ls_avg``).
+    mode:
+        Use jackknife (``"jk"``) or bootstrap (``"bs"``) covariance conventions.
+    axis:
+        Axis indexing independent resamples.
+
+    Returns
+    -------
+    numpy.ndarray
+        Same shape as ``samples``; each slice along ``axis`` is a ``gvar`` array
+        built with the shared covariance from ``gv.evalcov(avg)``.
+    """
+    arr = np.asarray(samples)
+    if axis != 0:
+        arr = np.swapaxes(arr, 0, axis)
+
+    if mode == "bs":
+        avg = bs_ls_avg_percentile(arr, axis=0)
+    else:
+        raise ValueError(f"unsupported sample covariance mode: {mode!r}")
+
+    out = np.array([gv.gvar(row, gv.sdev(avg)) for row in arr])
+
+    if axis != 0:
+        out = np.swapaxes(out, 0, axis)
+    return out
+
+
+def add_error_to_sample_uncorrelated(
+    samples: np.ndarray,
+    mode: SampleCovarianceMode = "bs",
+    *,
+    axis: int = 0,
+) -> np.ndarray:
+    """Attach uncorrelated errors from jackknife or bootstrap averages to each resample.
+
+    Standard deviations are taken from ``gv.sdev`` applied to the ensemble average
+    computed by ``jk_ls_avg`` or ``bs_ls_avg``; each independent resample slice
+    is turned into a ``gvar`` array with diagonal errors only (no cross-correlations).
+
+    Parameters
+    ----------
+    samples:
+        Jackknife or bootstrap samples (same layout as for ``jk_ls_avg`` /
+        ``bs_ls_avg``).
+    mode:
+        Use jackknife (``"jk"``) or bootstrap (``"bs"``) error conventions.
+    axis:
+        Axis indexing independent resamples.
+
+    Returns
+    -------
+    numpy.ndarray
+        Same shape as ``samples``; each slice along ``axis`` is a ``gvar`` array
+        built with uncorrelated errors from ``gv.sdev(avg)``.
+    """
+    arr = np.asarray(samples)
+    if axis != 0:
+        arr = np.swapaxes(arr, 0, axis)
+
+    if mode == "bs":
+        avg = bs_ls_avg(arr, axis=0)
+    elif mode == "jk":
+        avg = jk_ls_avg(arr, axis=0)
+    else:
+        raise ValueError(f"unsupported sample covariance mode: {mode!r}")
+
+    sdev = gv.sdev(avg)
+    out = np.array([gv.gvar(row, sdev) for row in arr])
+
+    if axis != 0:
+        out = np.swapaxes(out, 0, axis)
+    return out
+
+
 def gvar_ls_interpolate(
     x_ls: Sequence[float] | np.ndarray,
     gv_ls: list[gv.GVar],
