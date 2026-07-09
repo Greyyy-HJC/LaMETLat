@@ -4,12 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import matplotlib
-
-matplotlib.use("Agg")
-
 import gvar as gv
-import matplotlib.pyplot as plt
 import numpy as np
 
 from lametlat.correlators import (  # noqa: E402
@@ -73,14 +68,14 @@ LT = 32
 N_BOOT = 96
 BOOT_SEED = 1984
 TSEP_FILES = {
-    4: DATA_DIR / "fake_pt3_tsep4.h5",
-    6: DATA_DIR / "fake_pt3_tsep6.h5",
-    8: DATA_DIR / "fake_pt3_tsep8.h5",
-    10: DATA_DIR / "fake_pt3_tsep10.h5",
+    4: DATA_DIR / "fake_qtmdpdf_3pt_ts4.h5",
+    6: DATA_DIR / "fake_qtmdpdf_3pt_ts6.h5",
+    8: DATA_DIR / "fake_qtmdpdf_3pt_ts8.h5",
+    10: DATA_DIR / "fake_qtmdpdf_3pt_ts10.h5",
 }
 
 pt2 = read_pt2_h5(
-    DATA_DIR / "fake_pt2.h5",
+    DATA_DIR / "fake_2pt.h5",
     source_sink="SS",
     gamma="5",
     momentum="PX0PY0PZ0",
@@ -89,7 +84,7 @@ pt2 = read_pt2_h5(
     seed=BOOT_SEED,
 )
 qda = read_qda_h5(
-    DATA_DIR / "fake_qda.h5",
+    DATA_DIR / "fake_qtmdwf.h5",
     bT="bT0",
     bz="bz0",
     resampling="bs",
@@ -129,6 +124,12 @@ pt3_ratio_real, pt3_ratio_imag = get_pt3_ratio_data(
 )
 pt3_ratio_real_gv = bs_dict_avg(pt3_ratio_real)
 pt3_ratio_imag_gv = bs_dict_avg(pt3_ratio_imag)
+pt3_ratio_real_gv = {
+    tsep: np.asarray(values, dtype=object) for tsep, values in pt3_ratio_real_gv.items()
+}
+pt3_ratio_imag_gv = {
+    tsep: np.asarray(values, dtype=object) for tsep, values in pt3_ratio_imag_gv.items()
+}
 tau_dict = {tsep: np.arange(tsep + 2) for tsep in TSEP_FILES}
 
 fh_real, fh_imag = get_fh_data(
@@ -145,12 +146,13 @@ fh_tsep_ls = tsep_ls[:-1]
 
 pt2_fit_res = pt2_fit(
     pt2_gv,
-    tmin=5,
+    tmin=6,
     tmax=14,
     Lt=LT,
     prior=priors(),
     label="2-state fit",
 )
+
 pt3_fit_res = pt3_ratio_fit(
     tsep_ls=[6, 8, 10],
     tau_cut=3,
@@ -194,8 +196,6 @@ fh_fit_res = fh_fit(
     fit_label="2-state fit",
     save_path=PLOT_DIR / "pt2",
 )
-plt.close(fig_pt2)
-plt.close(fig_meff)
 
 (fig_qda_re, _), (fig_qda_im, _) = qda_ratio_plot(
     np.arange(13),
@@ -209,8 +209,6 @@ plt.close(fig_meff)
     id_label={"fake": "qDA", "bT": 0, "bz": 0},
     save_path=PLOT_DIR / "qda_ratio",
 )
-plt.close(fig_qda_re)
-plt.close(fig_qda_im)
 
 (fig_pt3_re, _), (fig_pt3_im, _) = pt3_ratio_plot(
     tau_dict,
@@ -223,8 +221,6 @@ plt.close(fig_qda_im)
     Lt=LT,
     save_path=PLOT_DIR / "pt3_ratio",
 )
-plt.close(fig_pt3_re)
-plt.close(fig_pt3_im)
 
 (fig_fh_re, _), (fig_fh_im, _) = fh_plot(
     fh_tsep_ls,
@@ -237,9 +233,8 @@ plt.close(fig_pt3_im)
     dt=2,
     save_path=PLOT_DIR / "fh",
 )
-plt.close(fig_fh_re)
-plt.close(fig_fh_im)
 
+# %%
 print("Read bootstrap shapes:")
 print(f"  pt2: {pt2.shape}")
 print(f"  qda: {qda.shape}")
@@ -257,5 +252,3 @@ print("FH fit:")
 print(f"  Q = {fh_fit_res.Q:.3f}")
 print(f"  chi2/dof = {fh_fit_res.chi2 / fh_fit_res.dof:.3f}")
 print(f"Wrote plots to {PLOT_DIR}")
-
-# %%

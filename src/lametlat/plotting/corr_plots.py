@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import gvar as gv
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
@@ -220,8 +221,7 @@ def pt2_plot(
         )
 
     if show:
-        fig_c2.show()
-        fig_meff.show()
+        plt.show()
 
     return (fig_c2, ax_c2), (fig_meff, ax_meff)
 
@@ -265,7 +265,7 @@ def pt3_ratio_plot(
     y_data_re: list[np.ndarray] = []
     yerr_re: list[np.ndarray] = []
     for tsep in tsep_ls:
-        ratio_row = ratio_real[tsep]
+        ratio_row = np.asarray(ratio_real[tsep], dtype=object)
         if correction_energy is not None:
             ratio_row = ratio_row * _pt3_ratio_denominator_correction( #! without this, the ratio at tsep -> inf will not converge to matrix_element
                 int(tsep),
@@ -343,7 +343,7 @@ def pt3_ratio_plot(
         y_data_im: list[np.ndarray] = []
         yerr_im: list[np.ndarray] = []
         for tsep in tsep_ls:
-            ratio_row = ratio_imag[tsep]
+            ratio_row = np.asarray(ratio_imag[tsep], dtype=object)
             if correction_energy is not None:
                 ratio_row = ratio_row * _pt3_ratio_denominator_correction(
                     int(tsep),
@@ -431,11 +431,10 @@ def pt3_ratio_plot(
             )
 
         if show:
-            fig_real.show()
-            fig_imag.show()
-    
+            plt.show()
+
         return (fig_real, ax_real), (fig_imag, ax_imag)
-    
+
     else:
         if save_path is not None:
             path = Path(save_path)
@@ -446,7 +445,7 @@ def pt3_ratio_plot(
                 transparent=True,
             )
         if show:
-            fig_real.show()
+            plt.show()
         return (fig_real, ax_real)
 
 
@@ -542,7 +541,7 @@ def ff_ratio_plot(
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path.with_name(f"{path.name}_real.pdf"), bbox_inches="tight", transparent=True)
     if show:
-        fig.show()
+        plt.show()
     return fig, ax
 
 
@@ -625,7 +624,7 @@ def ff_sum_plot(
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path.with_name(f"{path.name}_real.pdf"), bbox_inches="tight", transparent=True)
     if show:
-        fig.show()
+        plt.show()
     return fig, ax
 
 
@@ -797,8 +796,7 @@ def qda_ratio_plot(
             fig_imag.savefig(path.with_name(f"{path.name}_imag.pdf"), bbox_inches="tight", transparent=True)
 
         if show:
-            fig_real.show()
-            fig_imag.show()
+            plt.show()
         return (fig_real, ax_real), (fig_imag, ax_imag)
 
     if save_path is not None:
@@ -806,7 +804,7 @@ def qda_ratio_plot(
         path.parent.mkdir(parents=True, exist_ok=True)
         fig_real.savefig(path.with_name(f"{path.name}_real.pdf"), bbox_inches="tight", transparent=True)
     if show:
-        fig_real.show()
+        plt.show()
     return fig_real, ax_real
 
 
@@ -894,8 +892,7 @@ def fh_plot(
             fig_imag.savefig(path.with_name(f"{path.name}_imag.pdf"), bbox_inches="tight", transparent=True)
 
         if show:
-            fig_real.show()
-            fig_imag.show()
+            plt.show()
         return (fig_real, ax_real), (fig_imag, ax_imag)
 
     if save_path is not None:
@@ -903,5 +900,5 @@ def fh_plot(
         path.parent.mkdir(parents=True, exist_ok=True)
         fig_real.savefig(path.with_name(f"{path.name}_real.pdf"), bbox_inches="tight", transparent=True)
     if show:
-        fig_real.show()
+        plt.show()
     return fig_real, ax_real
