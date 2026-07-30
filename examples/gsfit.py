@@ -252,3 +252,5 @@ print("FH fit:")
 print(f"  Q = {fh_fit_res.Q:.3f}")
 print(f"  chi2/dof = {fh_fit_res.chi2 / fh_fit_res.dof:.3f}")
 print(f"Wrote plots to {PLOT_DIR}")
+
+# %%
