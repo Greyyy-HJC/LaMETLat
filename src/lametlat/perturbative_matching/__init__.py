@@ -2,11 +2,6 @@
 
 from .cg_pdf import (
     arctan_term,
-    helicity_matching_kernel_nlo_gTg5,
-    helicity_matching_kernel_nlo_gZg5,
-    transversity_matching_kernel_nlo,
-    unpolarized_matching_kernel_nlo_gT,
-    unpolarized_matching_kernel_nlo_gZ,
 )
 from .cg_tmd import (
     CG_ff_kernel_RGR,
@@ -41,13 +36,8 @@ __all__ = [
     "cusp0",
     "cusp1",
     "cusp2",
-    "helicity_matching_kernel_nlo_gTg5",
-    "helicity_matching_kernel_nlo_gZg5",
     "helicity_matching_kernel_rows_by_order",
     "sudakov_kernel",
-    "transversity_matching_kernel_nlo",
     "transversity_matching_kernel_rows",
-    "unpolarized_matching_kernel_nlo_gT",
-    "unpolarized_matching_kernel_nlo_gZ",
     "unpolarized_matching_kernel_rows_by_order",
 ]
