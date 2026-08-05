@@ -1,6 +1,7 @@
 """Perturbative matching between lattice and continuum factorization conventions."""
 
 from .cg_pdf import (
+    CG_pdf_kernel_msbar,
     arctan_term,
 )
 from .cg_tmd import (
@@ -26,6 +27,7 @@ from .collinear_small_bT import (
 __all__ = [
     "CG_ff_kernel_RGR",
     "CG_gamma_c",
+    "CG_pdf_kernel_msbar",
     "CG_tmd_kernel_RGR",
     "CG_tmd_kernel_fixed",
     "CG_tmdpdf_kernel_RGR",

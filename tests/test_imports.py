@@ -40,4 +40,5 @@ def test_core_subpackages_import():
     assert ground_state.ff_sum_two_state_fit is not None
     assert ground_state.ff_joint_two_state_fit is not None
     assert perturbative_matching.CG_tmd_kernel_RGR is not None
+    assert perturbative_matching.CG_pdf_kernel_msbar is not None
     assert perturbative_matching.arctan_term is not None
